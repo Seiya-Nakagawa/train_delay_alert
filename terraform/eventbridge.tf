@@ -3,8 +3,8 @@ resource "aws_cloudwatch_event_rule" "check_delay_rule" {
   description         = "Trigger train delay check every 5 minutes"
   schedule_expression = "rate(5 minutes)"
 
-  // TODO: 開発期間中は無効にしておく
-  is_enabled = false
+  # TODO: 開発期間中は無効にしておく
+  state = "DISABLED"
 
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-check-delay-rule"
