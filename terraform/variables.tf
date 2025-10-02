@@ -1,0 +1,39 @@
+variable "aws_region" {
+  description = "デプロイするAWSリージョン"
+  type        = string
+}
+
+variable "system_name" {
+  description = "システム識別子"
+  type        = string
+}
+
+variable "env" {
+  description = "環境識別子"
+  type        = string
+}
+
+variable "aws_account_id" {
+  description = "AWSアカウントID"
+  type        = string
+}
+
+variable "lambda_runtime_version" {
+  description = "Lambdaランタイムのバージョン"
+  type        = list(string)
+}
+
+variable "lambda_timeout_seconds" {
+  description = "Lambdaのタイムアウト（秒）"
+  type        = number
+}
+
+variable "lambda_memory_size" {
+  description = "Lambdaのメモリサイズ（MB）"
+  type        = number
+}
+
+variable "lambda_log_level" {
+  description = "Lambdaのログレベル"
+  type        = string
+}
