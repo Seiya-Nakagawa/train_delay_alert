@@ -43,8 +43,8 @@ resource "aws_lambda_function" "check_delay_lambda" {
   memory_size   = var.lambda_memory_size     # メモリサイズ（MB）
   role          = aws_iam_role.lambda_exec_role.arn
   # archive_fileで動的にZIP化したファイルを、デプロイパッケージとして直接指定します
-  filename         = data.archive_file.user_settings_lambda_function_zip.output_path
-  source_code_hash = data.archive_file.user_settings_lambda_function_zip.output_base64sha256
+  filename         = data.archive_file.check_delay_handler_function_zip.output_path
+  source_code_hash = data.archive_file.check_delay_handler_function_zip.output_base64sha256
 
   environment {
     variables = {
