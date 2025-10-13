@@ -17,7 +17,7 @@ resource "aws_lambda_layer_version" "dependencies_layer" {
 resource "aws_lambda_function" "user_settings_lambda" {
   function_name = "${local.name_prefix}-lambda-user-settings"
   handler       = "user_settings_lambda.lambda_handler"
-  runtime       = var.lambda_runtime_version
+  runtime       = var.lambda_runtime_version[0]
   timeout       = var.lambda_timeout_seconds # タイムアウト（秒）
   memory_size   = var.lambda_memory_size     # メモリサイズ（MB）
   role          = aws_iam_role.lambda_exec_role.arn
@@ -54,7 +54,7 @@ resource "aws_lambda_function_url" "user_settings_url" {
 resource "aws_lambda_function" "check_delay_lambda" {
   function_name = "${local.name_prefix}-lambda-check-delay"
   handler       = "check_delay_handler.lambda_handler"
-  runtime       = var.lambda_runtime_version
+  runtime       = var.lambda_runtime_version[0]
   timeout       = var.lambda_timeout_seconds # タイムアウト（秒）
   memory_size   = var.lambda_memory_size     # メモリサイズ（MB）
   role          = aws_iam_role.lambda_exec_role.arn
