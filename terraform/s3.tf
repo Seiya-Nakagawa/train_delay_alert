@@ -54,7 +54,7 @@ resource "aws_s3_object" "lambda_layer_zip" {
   source = "${path.module}/lambda-layers/python_libraries.zip" # ローカルのZIPファイルのパス
   
   # ファイルの内容が変わった時だけ再アップロードするための設定
-  etag = filemd5(var.lambda_layer_zip_path)
+  etag = filemd5("${path.module}/lambda-layers/python_libraries.zip")
 }
 
 # ライフサイクルルール (最新3世代を保持)
