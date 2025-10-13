@@ -51,10 +51,10 @@ resource "aws_s3_object" "lambda_layer_zip" {
   # 依存関係: バケットが作成された後に実行される
   bucket = aws_s3_bucket.s3_train_alert.id
   key    = "lambda-layers/python_libraries.zip" # S3内でのファイルパス
-  source = "${path.module}/lambda-layers/python_libraries.zip" # ローカルのZIPファイルのパス
+  source = local.lambda_layer_zip_path # ローカルのZIPファイルのパス
   
   # ファイルの内容が変わった時だけ再アップロードするための設定
-  etag = filemd5("${path.module}/lambda-layers/python_libraries.zip")
+  etag = filemd5(local.lambda_layer_zip_path)
 }
 
 # ライフサイクルルール (最新3世代を保持)

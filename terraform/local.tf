@@ -6,6 +6,8 @@ locals {
     "lambda-layers/"
   ])
 
+  lambda_layer_zip_path = "${path.module}/lambda-layers/python_libraries.zip"
+
   tags = {
     SystemName = var.system_name,
     Env        = var.env
