@@ -1,12 +1,4 @@
 # ----------------------------------------------------
-# S3上のライブラリ用ZIPの情報を取得するためのデータソース
-# ----------------------------------------------------
-data "aws_s3_object" "lambda_libraries_zip" {
-  bucket = aws_s3_bucket.s3_train_alert.id # s3.tfで定義されているアーティファクト用バケット
-  key    = "lambda-layers/${var.system_name}_python_libraries.zip"
-}
-
-# ----------------------------------------------------
 # 関数コード用のZIPファイルを自動で作成するためのデータソース
 # ----------------------------------------------------
 data "archive_file" "user_settings_lambda_function_zip" {
