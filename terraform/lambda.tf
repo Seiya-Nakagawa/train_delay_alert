@@ -9,7 +9,7 @@ resource "aws_lambda_layer_version" "dependencies_layer" {
   s3_key      = aws_s3_object.lambda_layer_zip.key
 
   # S3上のZIPが更新されたことを検知するために、そのファイルのETag(ハッシュ値)を監視します
-  source_code_hash    = aws_s3_object.lambda_libraries_zip.etag
+  source_code_hash    = aws_s3_object.lambda_layer_zip.etag
   compatible_runtimes = var.lambda_runtime_version
 }
 
