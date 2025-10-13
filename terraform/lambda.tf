@@ -62,6 +62,8 @@ resource "aws_lambda_function" "check_delay_lambda" {
   filename         = data.archive_file.check_delay_handler_function_zip.output_path
   source_code_hash = data.archive_file.check_delay_handler_function_zip.output_base64sha256
 
+  layers = [aws_lambda_layer_version.dependencies_layer.arn]
+
   environment {
     variables = {
       USERS_TABLE_NAME        = aws_dynamodb_table.users.name
