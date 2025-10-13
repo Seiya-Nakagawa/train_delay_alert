@@ -24,6 +24,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
   filename         = data.archive_file.user_settings_lambda_function_zip.output_path
   source_code_hash = data.archive_file.user_settings_lambda_function_zip.output_base64sha256
 
+  layers = [aws_lambda_layer_version.dependencies_layer.arn]
 
   logging_config {
     log_format            = "JSON"
