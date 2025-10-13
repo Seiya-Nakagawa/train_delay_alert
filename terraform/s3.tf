@@ -50,7 +50,7 @@ resource "aws_s3_object" "folders" {
 resource "aws_s3_object" "lambda_layer_zip" {
   # 依存関係: バケットが作成された後に実行される
   bucket = aws_s3_bucket.s3_train_alert.id
-  key    = "lambda-layers/train_python_libraries.zip" # S3内でのファイルパス
+  key    = "lambda-layers/python_libraries.zip" # S3内でのファイルパス
   source = "${path.module}/lambda-layers/python_libraries.zip" # ローカルのZIPファイルのパス
   
   # ファイルの内容が変わった時だけ再アップロードするための設定
