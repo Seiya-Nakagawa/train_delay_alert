@@ -3,16 +3,15 @@
 # ライブラリ(dependencies.zip)は、手動でS3にアップロードされていることを前提とします。
 # ----------------------------------------------------
 resource "aws_lambda_layer_version" "dependencies_layer" {
-  layer_name  = "${var.system_name}-${var.env}-laver-python-libraries"
-  description = "Shared libraries for link checker"
-  s3_bucket   = aws_s3_bucket.s3_train_alert.id
-  s3_key      = aws_s3_object.lambda_layer_zip.key
+  layer_name          = "${var.system_name}-${var.env}-laver-python-libraries"
+  description         = "Shared libraries for link checker"
+  s3_bucket           = aws_s3_bucket.s3_train_alert.id
+  s3_key              = aws_s3_object.lambda_layer_zip.key
 
   # S3上のZIPが更新されたことを検知するために、そのファイルのETag(ハッシュ値)を監視します
   source_code_hash    = aws_s3_object.lambda_layer_zip.etag
   compatible_runtimes = var.lambda_runtime_version
 }
-
 
 resource "aws_lambda_function" "user_settings_lambda" {
   function_name = "${local.name_prefix}-lambda-user-settings"
