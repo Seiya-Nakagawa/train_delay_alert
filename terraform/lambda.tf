@@ -7,9 +7,9 @@ resource "aws_lambda_layer_version" "dependencies_layer" {
   description         = "Shared libraries for link checker"
   s3_bucket           = aws_s3_bucket.s3_train_alert.id
   s3_key              = aws_s3_object.lambda_layer_zip.key
-
+  s3_object_version   = aws_s3_object.lambda_layer_zip.version_id
   # S3上のZIPが更新されたことを検知するために、そのファイルのETag(ハッシュ値)を監視します
-  source_code_hash    = aws_s3_object.lambda_layer_zip.etag
+  # source_code_hash    = aws_s3_object.lambda_layer_zip.etag
   compatible_runtimes = var.lambda_runtime_version
 }
 
