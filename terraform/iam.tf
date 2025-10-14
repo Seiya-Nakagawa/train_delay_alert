@@ -29,3 +29,9 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_dynamodb_fullaccess" {
   role       = aws_iam_role.lambda_exec_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess_v2"
 }
+
+# IAM Policy for Lambda (SSM Read Only)
+resource "aws_iam_role_policy_attachment" "lambda_policy_ssm_readonly" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+}
