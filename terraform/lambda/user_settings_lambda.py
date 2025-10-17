@@ -2,60 +2,69 @@ import json
 import os
 import base64
 import boto3
-from linebot import LineBotApi, WebhookHandler  # <- 修正
-from linebot.exceptions import InvalidSignatureError  # <- 修正
-from linebot.models import MessageEvent, TextMessage, TextSendMessage  # <- 修正```
+from linebot.v3 import LineBotApi, WebhookHandler
+from linebot.v3.exceptions import InvalidSignatureError
+from linebot.v3.models import MessageEvent, TextMessage, TextSendMessage
+
+# 変数設定
+CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('CHANNEL_ACCESS_TOKEN_PARAM_NAME')
+CHANNEL_SECRET_PARAM_NAME = os.environ.get('CHANNEL_SECRET_PARAM_NAME')
+ssm_client = boto3.client('ssm')
 
 # --- パラメータストアから値を取得 ---
-# SSMクライアントを初期化
-# Lambdaが実行されるリージョンを自動で取得します
-region_name = os.environ.get('AWS_REGION')
-ssm = boto3.client('ssm', region_name=region_name)
-
-def get_ssm_parameter(parameter_name):
+def get_ssm_parameter(ssm_param_name):
     """パラメータストアから値を取得するヘルパー関数"""
     try:
-        response = ssm.get_parameter(
-            Name=parameter_name,
+        response = ssm_client.get_parameter(
+            Name=ssm_param_name,
             WithDecryption=True
         )
+
         return response['Parameter']['Value']
     except Exception as e:
-        print(f"Error getting parameter {parameter_name}: {e}")
+        print(f"Error getting parameter {ssm_param_name}: {e}")
         raise e
 
-# ハンドラ関数の外でパラメータを取得（コールドスタート時のみ実行）
-CHANNEL_ACCESS_TOKEN = get_ssm_parameter('/train-prd/line/channel_access_token')
-CHANNEL_SECRET = get_ssm_parameter('/train-prd/line/channel_secret')
-# -----------------------------------
+CHANNEL_ACCESS_TOKEN = get_ssm_parameter(CHANNEL_ACCESS_TOKEN_PARAM_NAME)
+CHANNEL_SECRET = get_ssm_parameter(CHANNEL_SECRET_PARAM_NAME)
 
-line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+linebot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
-def lambda_handler(event, context):
-    signature = event['headers']['x-line-signature']
-    body = event['body']
-
-    if event.get('isBase64Encoded', False):
-        body = base64.b64decode(body).decode('utf-8')
-    
+# --- パラメータストアから値を取得 ---
+def signature_validation_check(body, signature):
     try:
         handler.handle(body, signature)
+
+        return None
     except InvalidSignatureError:
         return {
             'statusCode': 400,
             'body': json.dumps("Invalid signature. Please check your channel secret.")
         }
 
+
+def lambda_handler(event, context):
+    print(event)
+    body       = event['body']
+    signature  = event['headers']['x-line-signature']
+    event_type = body['events']['type']
+    user_Id = body['events']['source']['userId']
+
+    # base64エンコードされている場合、デコード
+    if event.get('isBase64Encoded', False):
+        body = base64.b64decode(body).decode('utf-8')
+
+    # 署名検証
+    validation_result = signature_validation_check(body, signature)
+    if validation_result:
+        return validation_result
+    
+    # イベントタイプに応じた処理
+    # 友達追加
+    # if event_type == 'follow':
+
     return {
         'statusCode': 200,
-        'body': json.dumps("OK")
+        'body': json.dumps("Hello from Lambda!")
     }
-
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=event.message.text)
-    )
-    
