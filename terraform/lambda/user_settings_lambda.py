@@ -13,9 +13,11 @@ from botocore.exceptions import ClientError
 CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN_NAME')
 CHANNEL_SECRET_PARAM_NAME = os.environ.get('LINE_CHANNEL_SECRET_NAME')
 TIMEZONE = timezone(timedelta(hours=+9), 'JST')
+TABLE_NAME = os.environ.get('TABLE_NAME')
+
 ssm_client = boto3.client('ssm')
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('Users')
+table = dynamodb.Table(TABLE_NAME)
 
 # --- パラメータストアから値を取得 (変更なし) ---
 def get_ssm_parameter(ssm_param_name):
