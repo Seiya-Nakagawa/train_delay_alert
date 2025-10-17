@@ -4,7 +4,7 @@ resource "aws_dynamodb_table" "users" {
   hash_key     = "lineUserId"
   deletion_protection_enabled = true
   attribute {
-    name = "line_user_id"
+    name = "lineUserId"
     type = "S"
   }
 
@@ -25,10 +25,10 @@ resource "aws_dynamodb_table" "users" {
 resource "aws_dynamodb_table" "train_status" {
   name         = "${local.name_prefix}-train-status"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "route_id"
+  hash_key     = "routeId"
   deletion_protection_enabled = true
   attribute {
-    name = "route_id"
+    name = "routeId"
     type = "S"
   }
 
