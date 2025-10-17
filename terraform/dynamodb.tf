@@ -13,9 +13,9 @@ resource "aws_dynamodb_table" "users" {
     attribute_name = "ttl"
   }
 
-  server_side_encryption {
-    enabled = true
-  }
+  # server_side_encryption {
+  #   enabled = true
+  # }
 
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-users"
@@ -25,7 +25,7 @@ resource "aws_dynamodb_table" "users" {
 resource "aws_dynamodb_table" "train_status" {
   name         = "${local.name_prefix}-train-status"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "routeId"
+  hash_key     = "route_id"
   deletion_protection_enabled = true
   attribute {
     name = "route_id"
@@ -37,9 +37,10 @@ resource "aws_dynamodb_table" "train_status" {
     attribute_name = "ttl"
   }
 
-  server_side_encryption {
-    enabled = true
-  }
+  # server_side_encryption {
+  #   enabled = true
+  # }
+
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-train-status"
   })
