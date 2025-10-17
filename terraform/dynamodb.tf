@@ -13,9 +13,9 @@ resource "aws_dynamodb_table" "users" {
     attribute_name = "ttl"
   }
 
-  # server_side_encryption {
-  #   enabled = true
-  # }
+  server_side_encryption {
+    enabled = true
+  }
 
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-users"
@@ -37,10 +37,10 @@ resource "aws_dynamodb_table" "train_status" {
     attribute_name = "ttl"
   }
 
-  # server_side_encryption {
-  #   enabled = true
-  # }
-
+  server_side_encryption {
+    enabled = true
+  }
+  
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-train-status"
   })
