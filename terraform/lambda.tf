@@ -39,6 +39,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
       USERS_TABLE_NAME                = aws_dynamodb_table.users.name
       LINE_CHANNEL_SECRET_NAME        = aws_ssm_parameter.line_channel_secret.name
       LINE_CHANNEL_ACCESS_TOKEN_NAME  = aws_ssm_parameter.line_channel_access_token.name
+      TABLE_NAME                      = aws_dynamodb_table.users.name
     }
   }
 
@@ -71,6 +72,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
       TRAIN_STATUS_TABLE_NAME = aws_dynamodb_table.train_status.name
       TRAFFIC_API_TOKEN_NAME  = aws_ssm_parameter.traffic_api_token.name
       LINE_CHANNEL_ACCESS_TOKEN_NAME = aws_ssm_parameter.line_channel_access_token.name
+      TABLE_NAME                      = aws_dynamodb_table.train_status.name
     }
   }
 
