@@ -35,8 +35,6 @@ resource "aws_lambda_function" "user_settings_lambda" {
 
   environment {
     variables = {
-      CHANNEL_ACCESS_TOKEN_PARAM_NAME = aws_ssm_parameter.line_channel_access_token.name
-      CHANNEL_SECRET_PARAM_NAME       = aws_ssm_parameter.line_channel_secret.name
       USERS_TABLE_NAME                = aws_dynamodb_table.users.name
       USERS_TABLE_NAME                = aws_dynamodb_table.users.name
       LINE_CHANNEL_SECRET_NAME        = aws_ssm_parameter.line_channel_secret.name
