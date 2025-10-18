@@ -13,8 +13,8 @@ from botocore.exceptions import ClientError
 
 # --- グローバル変数 (変更なし) ---
 LINE_CHANNEL_ID = os.environ.get('LINE_CHANNEL_ID')
-CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN_NAME')
-LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('LINE_CHANNEL_SECRET_NAME')
+LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME')
+LINE_CHANNEL_SECRET_PARAM_NAME = os.environ.get('LINE_CHANNEL_SECRET_PARAM_NAME')
 TIMEZONE = timezone(timedelta(hours=+9), 'JST')
 TABLE_NAME = os.environ.get('TABLE_NAME')
 FRONTEND_URL = os.environ.get('FRONTEND_URL')
@@ -37,8 +37,8 @@ def get_ssm_parameter(ssm_param_name):
         print(f"Error getting parameter {ssm_param_name}: {e}")
         raise e
 
-CHANNEL_ACCESS_TOKEN = get_ssm_parameter(CHANNEL_ACCESS_TOKEN_PARAM_NAME)
-CHANNEL_SECRET = get_ssm_parameter(CHANNEL_SECRET_PARAM_NAME)
+CHANNEL_ACCESS_TOKEN = get_ssm_parameter(LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME)
+CHANNEL_SECRET = get_ssm_parameter(LINE_CHANNEL_SECRET_PARAM_NAME)
 
 linebot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
