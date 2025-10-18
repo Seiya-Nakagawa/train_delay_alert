@@ -57,7 +57,7 @@ resource "aws_lambda_function_url" "user_settings_url" {
   cors {
     allow_credentials = false
     allow_origins     = [var.frontend_url]
-    allow_methods     = ["POST", "OPTIONS"]
+    allow_methods     = ["POST"]
     allow_headers     = ["Content-Type"]
     expose_headers    = []
     max_age           = 86400 # 1日
