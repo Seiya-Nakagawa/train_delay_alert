@@ -2,6 +2,8 @@ import json
 import os
 import base64
 import boto3
+import requests
+
 # v3から旧バージョンへの変更点 (1)
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -10,10 +12,13 @@ from datetime import datetime, timezone, timedelta
 from botocore.exceptions import ClientError
 
 # --- グローバル変数 (変更なし) ---
+LINE_CHANNEL_ID = os.environ.get('LINE_CHANNEL_ID')
 CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN_NAME')
-CHANNEL_SECRET_PARAM_NAME = os.environ.get('LINE_CHANNEL_SECRET_NAME')
+LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('LINE_CHANNEL_SECRET_NAME')
 TIMEZONE = timezone(timedelta(hours=+9), 'JST')
 TABLE_NAME = os.environ.get('TABLE_NAME')
+FRONTEND_URL = os.environ.get('FRONTEND_URL')
+LINE_URL = "https://api.line.me/oauth2/v2.1/token"
 
 ssm_client = boto3.client('ssm')
 dynamodb = boto3.resource('dynamodb')
@@ -106,62 +111,38 @@ def activate_user(event):
             # 予期せぬDBエラーは呼び出し元に伝える
             raise e
 
-# --- 路線リスト ---
-def send_route_selection(reply_token):
-    """ユーザーに路線の選択肢をクイックリプライで送信する"""
-    try:
-        # TODO:後からAPI取得に変更
-        SUPPORTED_ROUTES = ['山手線', '京浜東北線', '中央線', '総武線', '埼京線']
-
-        # クイックリプライの路線リストボタンを作成
-        items = [
-            QuickReplyButton(action=MessageAction(label=route, text=route))
-            for route in SUPPORTED_ROUTES
-        ]
-
-        # 送信するメッセージオブジェクトを作成する
-        # text にはユーザーへの案内文を、quick_reply には作成したボタンリストを渡す
-        message = TextSendMessage(
-            text="通知を受け取りたい路線を選択してください👇",
-            quick_reply=QuickReply(items=items)
-        )
-
-        # print(f"TextMessage object created. Text: '{message.text}', QuickReply items: {len(message.quick_reply.items) if message.quick_reply else 'None'}")
-
-        # 作成したメッセージを、指定された reply_token を使って返信する
-        linebot_api.reply_message(reply_token, message)
-
-        print(f"linebot_api.reply_message called successfully for reply_token: {reply_token}")
-
-        return
-    except Exception as e:
-        print(f"路線リスト作成処理でエラーが発生しました: {e}")
-        raise e
-
-
-
 # --- v3からの変更点 (3): lambda_handlerをSDKの標準的な形式に修正 ---
 def lambda_handler(event, context):
+    print("event:")
     print(event)
-    """Lambdaのエントリポイント"""
-    # リクエストヘッダーから署名を取得
-    signature = event['headers']['x-line-signature']
 
-    # リクエストボディを取得
-    body = event['body']
-
-    # base64エンコードされている場合、デコード
-    if event.get('isBase64Encoded', False):
-        body = base64.b64decode(body).decode('utf-8')
-
-    # 署名を検証し、イベントをそれぞれのハンドラにディスパッチ
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
+    # 認可コードを取得
+    body_string = event.get('body', '{}')
+    body_dict = json.loads(body_string)
+    auth_code = body_dict.get('authorizationCode')
+    if not auth_code:
+        print("ERROR: 認可コードを取得できませんでした。")
         return {
             'statusCode': 400,
-            'body': json.dumps("Invalid signature. Please check your channel secret.")
+            'headers': { 'Access-Control-Allow-Origin': FRONTEND_URL },
+            'body': json.dumps({'message': '認可コードが必要です。'})
         }
+
+    # LINEのアクセストークン取得API呼び出し
+    response = requests.post(
+        LINE_URL,
+        headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        data={
+            'grant_type': 'authorization_code',
+            'code': auth_code,
+            'redirect_uri': FRONTEND_URL,
+            'client_id': LINE_CHANNEL_ID,
+            'client_secret': CHANNEL_SECRET
+        }
+    )
+
+    print("LINE token response:")
+    print(response.json())
 
     # 成功レスポンス
     return {

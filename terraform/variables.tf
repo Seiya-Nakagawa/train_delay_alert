@@ -48,3 +48,8 @@ variable "frontend_url" {
   description = "フロントエンドのURL"
   type        = string
 }
+
+variable "line_channel_id" {
+  description = "LINEチャネルID"
+  type        = string
+}
