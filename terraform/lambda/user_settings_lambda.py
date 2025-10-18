@@ -142,6 +142,7 @@ def send_route_selection(reply_token):
 
 # --- v3からの変更点 (3): lambda_handlerをSDKの標準的な形式に修正 ---
 def lambda_handler(event, context):
+    print(event)
     """Lambdaのエントリポイント"""
     # リクエストヘッダーから署名を取得
     signature = event['headers']['x-line-signature']
