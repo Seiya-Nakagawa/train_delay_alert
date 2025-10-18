@@ -38,11 +38,11 @@ def get_ssm_parameter(ssm_param_name):
         print(f"Error getting parameter {ssm_param_name}: {e}")
         raise e
 
-CHANNEL_ACCESS_TOKEN = get_ssm_parameter(LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME)
-CHANNEL_SECRET = get_ssm_parameter(LINE_CHANNEL_SECRET_PARAM_NAME)
+LINE_CHANNEL_ACCESS_TOKEN_NAME = get_ssm_parameter(LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME)
+LINE_CHANNEL_SECRET_NAME = get_ssm_parameter(LINE_CHANNEL_SECRET_PARAM_NAME)
 
-linebot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(CHANNEL_SECRET)
+linebot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN_NAME)
+handler = WebhookHandler(LINE_CHANNEL_SECRET_NAME)
 
 # --- v3からの変更点 (2): イベントハンドラの定義 ---
 # @handler.add(FollowEvent)
@@ -138,7 +138,7 @@ def lambda_handler(event, context):
             'code': auth_code,
             'redirect_uri': FRONTEND_REDIRECT_URL,
             'client_id': LINE_CHANNEL_ID,
-            'client_secret': CHANNEL_SECRET
+            'client_secret': LINE_CHANNEL_SECRET_NAME
         }
     )
 
