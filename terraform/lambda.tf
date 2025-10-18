@@ -54,14 +54,14 @@ resource "aws_lambda_function_url" "user_settings_url" {
   function_name      = aws_lambda_function.user_settings_lambda.function_name
   authorization_type = "NONE"
 
-  cors {
-    allow_credentials = false
-    allow_origins     = [var.frontend_url]
-    allow_methods     = ["POST", "OPTIONS"]
-    allow_headers     = ["Content-Type"]
-    expose_headers    = []
-    max_age           = 86400 # 1日
-  }
+  # cors {
+  #   allow_credentials = false
+  #   allow_origins     = [var.frontend_url]
+  #   allow_methods     = ["POST", "OPTIONS"]
+  #   allow_headers     = ["Content-Type"]
+  #   expose_headers    = []
+  #   max_age           = 86400 # 1日
+  # }
 }
 
 resource "aws_lambda_function" "check_delay_lambda" {
