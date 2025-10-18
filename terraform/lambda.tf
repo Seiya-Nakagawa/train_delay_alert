@@ -41,7 +41,8 @@ resource "aws_lambda_function" "user_settings_lambda" {
       LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME  = aws_ssm_parameter.line_channel_access_token.name
       LINE_CHANNEL_SECRET_PARAM_NAME        = aws_ssm_parameter.line_channel_secret.name
       TABLE_NAME                            = aws_dynamodb_table.users.name
-      FRONTEND_URL                          = var.frontend_url
+      FRONTEND_REDIRECT_URL                 = var.frontend_redirect_url
+      FRONTEND_ORIGIN                       = var.frontend_origin
     }
   }
 
@@ -56,7 +57,7 @@ resource "aws_lambda_function_url" "user_settings_url" {
 
   cors {
     allow_credentials = false
-    allow_origins     = [var.frontend_url]
+    allow_origins     = [var.frontend_redirect_url]
     allow_methods     = ["POST"]
     allow_headers     = ["Content-Type"]
     expose_headers    = []

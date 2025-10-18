@@ -17,7 +17,8 @@ LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN
 LINE_CHANNEL_SECRET_PARAM_NAME = os.environ.get('LINE_CHANNEL_SECRET_PARAM_NAME')
 TIMEZONE = timezone(timedelta(hours=+9), 'JST')
 TABLE_NAME = os.environ.get('TABLE_NAME')
-FRONTEND_URL = os.environ.get('FRONTEND_URL')
+FRONTEND_REDIRECT_URL = os.environ.get('FRONTEND_REDIRECT_URL')
+FRONTEND_ORIGIN = os.environ.get('FRONTEND_ORIGIN')
 LINE_URL = "https://api.line.me/oauth2/v2.1/token"
 
 ssm_client = boto3.client('ssm')
@@ -124,7 +125,7 @@ def lambda_handler(event, context):
         print("ERROR: 認可コードを取得できませんでした。")
         return {
             'statusCode': 400,
-            'headers': { 'Access-Control-Allow-Origin': FRONTEND_URL },
+            'headers': { 'Access-Control-Allow-Origin': FRONTEND_ORIGIN },
             'body': json.dumps({'message': '認可コードが必要です。'})
         }
 
@@ -135,7 +136,7 @@ def lambda_handler(event, context):
         data={
             'grant_type': 'authorization_code',
             'code': auth_code,
-            'redirect_uri': FRONTEND_URL,
+            'redirect_uri': FRONTEND_REDIRECT_URL,
             'client_id': LINE_CHANNEL_ID,
             'client_secret': CHANNEL_SECRET
         }

@@ -44,8 +44,13 @@ variable "notification_emails" {
   default     = []
 }
 
-variable "frontend_url" {
+variable "frontend_redirect_url" {
   description = "フロントエンドのURL"
+  type        = string
+}
+
+variable "frontend_origin" {
+  description = "フロントエンドのオリジン"
   type        = string
 }
 
