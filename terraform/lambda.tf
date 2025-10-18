@@ -57,7 +57,7 @@ resource "aws_lambda_function_url" "user_settings_url" {
 
   cors {
     allow_credentials = false
-    allow_origins     = [var.frontend_redirect_url]
+    allow_origins     = [var.frontend_origin]
     allow_methods     = ["POST"]
     allow_headers     = ["Content-Type"]
     expose_headers    = []
