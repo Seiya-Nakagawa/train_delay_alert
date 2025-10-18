@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>サンプルウェブページ</title>
+    <title>路線遅延通知システム</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>ようこそ！</h1>
+        <h1>路線遅延通知システム</h1>
     </header>
     <main>
-        <p>これはGitHub Pages用のサンプルウェブページです。</p>
-        <button id="alertButton">クリックしてね</button>
+        <div id="userInfo" class="user-info" style="display: none;">
+            <p>LINE User ID: <span id="userId"></span></p>
+        </div>
+        <div class="container">
+            <h2>登録路線</h2>
+            <div id="routeListContainer">
+                <!-- 登録された路線がここに追加されます -->
+            </div>
+            <button id="addRowButton" class="add-row-btn">+</button>
+        </div>
     </main>
     <footer>
-        <p>&copy; 2025 サンプル株式会社</p>
+        <p>&copy; 2025 train_delay_alert</p>
     </footer>
     <script src="script.js"></script>
 </body>
