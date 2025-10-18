@@ -43,3 +43,8 @@ variable "notification_emails" {
   type        = list(string)
   default     = []
 }
+
+variable "frontend_url" {
+  description = "フロントエンドのURL"
+  type        = string
+}

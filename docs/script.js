@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function getUserDataFromLambda(code) {
         try {
-            const response = await fetch(config.apiGatewayEndpoint, {
+            const response = await fetch(config.lambdaEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ authorizationCode: code })
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Lambdaに保存リクエストを送信 (GETとは別のエンドポイントを想定)
                 // この例では同じエンドポイントにペイロードを送り、Lambda側で処理を分岐させると仮定
-                const response = await fetch(config.apiGatewayEndpoint, {
+                const response = await fetch(config.lambdaEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

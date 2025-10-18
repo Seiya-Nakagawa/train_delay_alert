@@ -40,6 +40,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
       LINE_CHANNEL_SECRET_NAME        = aws_ssm_parameter.line_channel_secret.name
       LINE_CHANNEL_ACCESS_TOKEN_NAME  = aws_ssm_parameter.line_channel_access_token.name
       TABLE_NAME                      = aws_dynamodb_table.users.name
+      FRONTEND_URL                    = var.frontend_url
     }
   }
 
@@ -51,6 +52,15 @@ resource "aws_lambda_function" "user_settings_lambda" {
 resource "aws_lambda_function_url" "user_settings_url" {
   function_name      = aws_lambda_function.user_settings_lambda.function_name
   authorization_type = "NONE"
+
+  cors {
+    allow_credentials = false
+    allow_origins     = [os.getenv("FRONTEND_URL")]
+    allow_methods     = ["POST", "OPTIONS"]
+    allow_headers     = ["Content-Type"]
+    expose_headers    = []
+    max_age           = 86400 # 1日
+  }
 }
 
 resource "aws_lambda_function" "check_delay_lambda" {

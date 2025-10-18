@@ -14,7 +14,15 @@
         <div id="userInfo" class="user-info" style="display: none;">
             <p>LINE User ID: <span id="userId"></span></p>
         </div>
-        <div class="container">
+
+        <!-- ▼▼▼ ここから追加 ▼▼▼ -->
+        <div id="messageArea">
+            <p id="messageText">ユーザー情報を読み込んでいます...</p>
+        </div>
+        <!-- ▲▲▲ ここまで追加 ▲▲▲ -->
+
+        <!-- ↓↓↓ フォームコンテナで全体を囲むように変更 ↓↓↓ -->
+        <div id="formContainer" class="container" style="display: none;">
             <h2>登録路線</h2>
             <div id="routeListContainer">
                 <!-- 登録された路線がここに追加されます -->
