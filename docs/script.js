@@ -11,8 +11,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- メインの初期化処理 ---
     async function main() {
-        // 1. LINE User IDの処理
         const params = new URLSearchParams(window.location.search);
+
+        // 1. 認可コードをLambdaに連携 (URLにcodeがあれば)
+        const authCode = params.get('code');
+        if (authCode) {
+            sendAuthCodeToLambda(authCode);
+        }
+
+        // 2. LINE User IDの処理
         const userId = params.get('userId');
         if (userId) {
             lineUserId = userId;
@@ -20,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             userInfoDiv.style.display = 'block';
         }
 
-        // 2. 路線データの読み込み
+        // 3. 路線データの読み込み
         try {
             const response = await fetch('routes.json');
             if (!response.ok) {
@@ -34,11 +41,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             // allRoutesは空のままになる
         }
 
-        // 3. 初期路線の表示
+        // 4. 初期路線の表示
         initializeRoutes();
 
-        // 4. イベントリスナーの設定
+        // 5. イベントリスナーの設定
         setupEventListeners();
+    }
+
+    // --- Lambdaへ認可コードを送信する関数（シミュレーション） ---
+    function sendAuthCodeToLambda(code) {
+        const lambdaEndpoint = config.lambdaEndpoint; // config.jsからURLを取得
+
+        const payload = {
+            authorizationCode: code
+        };
+
+        console.log('認可コードをLambdaに送信します:');
+        console.log(`  -> エンドポイント: ${lambdaEndpoint}`);
+        console.log('  -> ペイロード:', payload);
+
+        // 下記は実際のバックエンド連携時に有効化する
+        /*
+        fetch(lambdaEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Lambdaからの応答:', data);
+            // ここで受け取ったユーザーIDなどを処理する
+        })
+        .catch(error => {
+            console.error('Lambdaへのリクエストに失敗しました:', error);
+        });
+        */
     }
 
     // --- 路線リストの初期化 ---
@@ -100,6 +139,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- イベントリスナーをまとめる関数 ---
     function setupEventListeners() {
+        const saveButton = document.getElementById('saveButton');
+
+        saveButton.addEventListener('click', () => {
+            // 1. User IDのチェック
+            if (!lineUserId) {
+                alert('LINEユーザーIDが取得できていません。リッチメニューから再度アクセスしてください。');
+                return;
+            }
+
+            // 2. 登録路線の取得
+            const routeInputs = document.querySelectorAll('.route-input');
+            const routes = Array.from(routeInputs)
+                .map(input => input.value.trim())
+                .filter(route => route !== '');
+
+            if (routes.length === 0) {
+                alert('保存する路線がありません。');
+                return;
+            }
+
+            // 3. 送信データの作成
+            const payload = {
+                userId: lineUserId,
+                routes: routes
+            };
+
+            // 4. バックエンドへの送信（シミュレーション）
+            console.log('以下のデータをバックエンドに送信します:', payload);
+            alert(`以下の内容で保存しました：\n\n路線: ${routes.join('、')}`);
+        });
+
         addRowButton.addEventListener('click', () => {
             const currentRows = routeListContainer.getElementsByClassName('route-row').length;
             if (currentRows >= MAX_ROUTES) {

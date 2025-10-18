@@ -39,10 +39,10 @@ linebot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 # --- v3からの変更点 (2): イベントハンドラの定義 ---
-@handler.add(FollowEvent)
-def handle_follow(event):
-    """友達追加イベントを処理する"""
-    register_user(event)
+# @handler.add(FollowEvent)
+# def handle_follow(event):
+#     """友達追加イベントを処理する"""
+#     register_user(event)
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
@@ -56,32 +56,33 @@ def handle_message(event):
         # 「路線設定」以外のメッセージが来た場合のデフォルトの応答
         # 例: オウム返し
         linebot_api.reply_message(reply_token, TextMessage(text=f"路線設定する場合は「路線設定」と入力してください。"))
+
 # --- DynamoDBにユーザ情報登録 ---
-def register_user(event):
-    """DynamoDBにユーザ情報を登録する"""
-    try:
-        line_user_id = event.source.user_id
-        dt_now_iso = datetime.now(TIMEZONE).isoformat()
+# def register_user(event):
+#     """DynamoDBにユーザ情報を登録する"""
+#     try:
+#         line_user_id = event.source.user_id
+#         dt_now_iso = datetime.now(TIMEZONE).isoformat()
 
-        # DynamoDBに書き込むアイテムを定義
-        item = {
-            'lineUserId': line_user_id,
-            'userStatus': "onboarding",
-            'createdAt': dt_now_iso,
-            'updatedAt': dt_now_iso,
-        }
+#         # DynamoDBに書き込むアイテムを定義
+#         item = {
+#             'lineUserId': line_user_id,
+#             'userStatus': "onboarding",
+#             'createdAt': dt_now_iso,
+#             'updatedAt': dt_now_iso,
+#         }
 
-        # 条件付きでアイテムを追加（既存ユーザはスキップ）
-        # v3からの変更点 (4): 引数名を 'item' から 'Item' に修正
-        table.put_item(
-            Item=item,
-            ConditionExpression='attribute_not_exists(lineUserId)'
-        )
+#         # 条件付きでアイテムを追加（既存ユーザはスキップ）
+#         # v3からの変更点 (4): 引数名を 'item' から 'Item' に修正
+#         table.put_item(
+#             Item=item,
+#             ConditionExpression='attribute_not_exists(lineUserId)'
+#         )
 
-        print(f"Successfully registered new user: {line_user_id}")
-    except Exception as e:
-        print(f"ユーザ登録処理に失敗しました。: {e}")
-        raise e
+#         print(f"Successfully registered new user: {line_user_id}")
+#     except Exception as e:
+#         print(f"ユーザ登録処理に失敗しました。: {e}")
+#         raise e
 
 # --- DynamoDBのユーザ情報更新 ---
 def activate_user(event):
