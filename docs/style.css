@@ -37,6 +37,13 @@ h2 {
     margin-bottom: 1.5rem;
 }
 
+.description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
 #notificationTimeContainer {
     /* display: flex; */
     /* align-items: center; */

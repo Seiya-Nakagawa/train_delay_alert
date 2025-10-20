@@ -23,6 +23,13 @@
 
         <!-- ↓↓↓ フォームコンテナで全体を囲むように変更 ↓↓↓ -->
         <div id="formContainer" class="container" style="display: none;">
+            <h2>登録路線</h2>
+            <p class="description">最大5つまで登録できます。</p>
+            <div id="routeListContainer">
+                <!-- 登録された路線がここに追加されます -->
+            </div>
+            <button id="addRowButton" class="add-row-btn">+</button>
+
             <h2>通知時間帯</h2>
             <div id="notificationTimeContainer">
                 <div>
@@ -48,12 +55,6 @@
                     </div>
                 </div>
             </div>
-
-            <h2>登録路線</h2>
-            <div id="routeListContainer">
-                <!-- 登録された路線がここに追加されます -->
-            </div>
-            <button id="addRowButton" class="add-row-btn">+</button>
             <div class="save-container">
                 <button id="saveButton" class="action-btn">保存</button>
             </div>
