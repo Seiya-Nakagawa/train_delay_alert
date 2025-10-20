@@ -25,10 +25,28 @@
         <div id="formContainer" class="container" style="display: none;">
             <h2>通知時間帯</h2>
             <div id="notificationTimeContainer">
-                <label for="startTime">開始時刻:</label>
-                <input type="time" id="startTime">
-                <label for="endTime">終了時刻:</label>
-                <input type="time" id="endTime">
+                <div>
+                    <input type="checkbox" id="allDayCheckbox" class="time-setting-checkbox">
+                    <label for="allDayCheckbox">全時間帯を対象にする</label>
+                </div>
+                <div id="timeInputs">
+                    <label for="startTime">開始時刻:</label>
+                    <input type="time" id="startTime">
+                    <label for="endTime">終了時刻:</label>
+                    <input type="time" id="endTime">
+                </div>
+                <div id="dayOfWeekContainer">
+                    <label class="dow-label">曜日:</label>
+                    <div class="dow-checkboxes">
+                        <input type="checkbox" id="dayMon" value="mon"><label for="dayMon">月</label>
+                        <input type="checkbox" id="dayTue" value="tue"><label for="dayTue">火</label>
+                        <input type="checkbox" id="dayWed" value="wed"><label for="dayWed">水</label>
+                        <input type="checkbox" id="dayThu" value="thu"><label for="dayThu">木</label>
+                        <input type="checkbox" id="dayFri" value="fri"><label for="dayFri">金</label>
+                        <input type="checkbox" id="daySat" value="sat"><label for="daySat">土</label>
+                        <input type="checkbox" id="daySun" value="sun"><label for="daySun">日</label>
+                    </div>
+                </div>
             </div>
 
             <h2>登録路線</h2>

@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formContainer = document.getElementById('formContainer');
     const startTimeInput = document.getElementById('startTime');
     const endTimeInput = document.getElementById('endTime');
+    const allDayCheckbox = document.getElementById('allDayCheckbox');
+    const timeInputs = document.getElementById('timeInputs');
+    const dayOfWeekContainer = document.getElementById('dayOfWeekContainer');
 
     // --- グローバル変数 ---
     const MAX_ROUTES = 5;
@@ -110,11 +113,25 @@ document.addEventListener('DOMContentLoaded', async () => {
      * @param {object} userData - ユーザー情報
      */
     function initializeSettings(userData) {
-        const { routes = [], notificationStartTime = '07:00', notificationEndTime = '09:00' } = userData;
+        const { 
+            routes = [], 
+            notificationStartTime = '07:00', 
+            notificationEndTime = '09:00',
+            isAllDay = false,
+            notificationDays = ['mon', 'tue', 'wed', 'thu', 'fri'] // デフォルトは平日
+        } = userData;
 
-        // 通知時間帯をセット
+        // 時間帯設定
         startTimeInput.value = notificationStartTime;
         endTimeInput.value = notificationEndTime;
+        allDayCheckbox.checked = isAllDay;
+        timeInputs.style.display = isAllDay ? 'none' : '';
+
+        // 曜日設定
+        const dayCheckboxes = dayOfWeekContainer.querySelectorAll('input[type="checkbox"]');
+        dayCheckboxes.forEach(checkbox => {
+            checkbox.checked = notificationDays.includes(checkbox.value);
+        });
 
         // 路線リストを初期化
         routeListContainer.innerHTML = ''; // コンテナをクリア
@@ -189,26 +206,39 @@ document.addEventListener('DOMContentLoaded', async () => {
      * 保存ボタンや追加ボタンなどのイベントリスナーを設定
      */
     function setupEventListeners() {
+        // 全時間帯チェックボックス
+        allDayCheckbox.addEventListener('change', () => {
+            timeInputs.style.display = allDayCheckbox.checked ? 'none' : '';
+        });
+
         // 保存ボタン
         saveButton.addEventListener('click', async () => {
+            // 路線
             const routeInputs = document.querySelectorAll('.route-input');
             const routesToSave = Array.from(routeInputs)
                 .map(input => input.value.trim())
                 .filter(route => route !== ''); // 空の入力は除外
 
+            // 曜日
+            const dayCheckboxes = dayOfWeekContainer.querySelectorAll('input[type="checkbox"]');
+            const selectedDays = Array.from(dayCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+
             const payload = {
                 userId: lineUserId,
                 routes: routesToSave,
                 notificationStartTime: startTimeInput.value,
-                notificationEndTime: endTimeInput.value
+                notificationEndTime: endTimeInput.value,
+                isAllDay: allDayCheckbox.checked,
+                notificationDays: selectedDays
             };
             
             displayMessage('保存中...', false);
             formContainer.style.display = 'none'; // 保存中はフォームを非表示
 
             try {
-                // Lambdaに保存リクエストを送信 (GETとは別のエンドポイントを想定)
-                // この例では同じエンドポイントにペイロードを送り、Lambda側で処理を分岐させると仮定
+                // Lambdaに保存リクエストを送信
                 const response = await fetch(config.lambdaEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
