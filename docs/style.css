@@ -38,17 +38,39 @@ h2 {
 }
 
 #notificationTimeContainer {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    /* display: flex; */
+    /* align-items: center; */
+    /* gap: 0.5rem; */
     margin-bottom: 1.5rem;
 }
 
-#notificationTimeContainer input[type=\"time\"] {
+#timeInputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#notificationTimeContainer input[type="time"] {
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+#dayOfWeekContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dow-checkboxes input {
+    margin-right: 0.25rem;
+}
+
+.dow-checkboxes label {
+    margin-right: 0.75rem;
+}
+
 
 #routeListContainer {
     display: flex;
@@ -164,4 +186,50 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+}
+
+/* --- Responsive Styles for Mobile --- */
+@media (max-width: 600px) {
+    body {
+        padding-bottom: 60px; /* フッターの高さ分 */
+    }
+
+    .container {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+
+    #timeInputs {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    #timeInputs label {
+        margin-bottom: 0;
+    }
+
+    #timeInputs input[type="time"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #dayOfWeekContainer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .dow-checkboxes {
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        width: 100%;
+    }
+
+    footer {
+        padding: 0.5rem;
+    }
 }
