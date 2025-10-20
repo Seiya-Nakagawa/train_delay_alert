@@ -172,13 +172,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         suggestionsListElement.innerHTML = '';
         if (value.length === 0 || allRoutes.length === 0) return;
 
-        const suggestions = allRoutes.filter(route => route.includes(value)).slice(0, 10);
+        const suggestions = allRoutes.filter(route => route.line_name.includes(value)).slice(0, 10);
         suggestions.forEach(suggestion => {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
-            item.textContent = suggestion;
+            item.textContent = suggestion.line_name;
             item.addEventListener('mousedown', () => { // clickではなくmousedownを使うことでblurイベントより先に発火させる
-                inputElement.value = suggestion;
+                inputElement.value = suggestion.line_name;
                 suggestionsListElement.innerHTML = '';
             });
             suggestionsListElement.appendChild(item);
