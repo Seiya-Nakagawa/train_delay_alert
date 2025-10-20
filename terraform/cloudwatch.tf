@@ -8,6 +8,7 @@ resource "aws_cloudwatch_metric_alarm" "user_settings_lambda_errors" {
   statistic           = "Sum"
   threshold           = "1"
   alarm_description   = "Alarm when user_settings_lambda has errors"
+  actions_enabled     = false
 
   dimensions = {
     FunctionName = aws_lambda_function.user_settings_lambda.function_name
@@ -31,6 +32,7 @@ resource "aws_cloudwatch_metric_alarm" "check_delay_lambda_errors" {
   statistic           = "Sum"
   threshold           = "1"
   alarm_description   = "Alarm when check_delay_lambda has errors"
+  actions_enabled     = false
 
   dimensions = {
     FunctionName = aws_lambda_function.check_delay_lambda.function_name

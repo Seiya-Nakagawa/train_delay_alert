@@ -37,14 +37,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 3. 認可コードをLambdaに送信してユーザー情報を取得
         const userData = await getUserDataFromLambda(authCode);
 
-        if (userData && userData.userId) {
-            lineUserId = userData.userId;
+        // userDataが取得できたか、また必須のlineUserIdが含まれているかを確認
+        if (userData && userData.lineUserId) {
+            lineUserId = userData.lineUserId;
             
             // 4. ユーザー情報を画面に表示
             userIdSpan.textContent = lineUserId;
             userInfoDiv.style.display = 'block';
 
-            // 5. 取得した既存の路線データでリストを初期化
+            // 5. 取得した路線データでリストを初期化（新規ユーザーの場合は空の配列が渡される）
             initializeRoutes(userData.routes || []);
             
             // 6. フォームを表示し、メッセージエリアを非表示にする
@@ -52,7 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             messageArea.style.display = 'none';
 
         } else {
-            // ユーザー情報が取得できなかった場合
+            // ユーザー情報が取得できなかった、またはレスポンス形式が不正な場合
+            console.error('取得したユーザーデータが不正です:', userData);
             displayMessage('エラー: ユーザー情報の取得に失敗しました。時間をおいて再度お試しください。', true);
         }
 
