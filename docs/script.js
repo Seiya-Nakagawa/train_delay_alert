@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const messageArea = document.getElementById('messageArea');
     const messageText = document.getElementById('messageText');
     const formContainer = document.getElementById('formContainer');
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
 
     // --- グローバル変数 ---
     const MAX_ROUTES = 5;
@@ -42,11 +44,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             lineUserId = userData.lineUserId;
             
             // 4. ユーザー情報を画面に表示
-            userIdSpan.textContent = lineUserId;
-            userInfoDiv.style.display = 'block';
+            // userIdSpan.textContent = lineUserId;
+            // userInfoDiv.style.display = 'block';
 
-            // 5. 取得した路線データでリストを初期化（新規ユーザーの場合は空の配列が渡される）
-            initializeRoutes(userData.routes || []);
+            // 5. 取得したデータでフォームを初期化
+            initializeSettings(userData);
             
             // 6. フォームを表示し、メッセージエリアを非表示にする
             formContainer.style.display = 'block';
@@ -104,10 +106,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**
-     * 登録済みの路線リストで入力欄を初期化する
-     * @param {string[]} routes - 登録済みの路線名の配列
+     * ユーザーデータでフォーム全体を初期化する
+     * @param {object} userData - ユーザー情報
      */
-    function initializeRoutes(routes) {
+    function initializeSettings(userData) {
+        const { routes = [], notificationStartTime = '07:00', notificationEndTime = '09:00' } = userData;
+
+        // 通知時間帯をセット
+        startTimeInput.value = notificationStartTime;
+        endTimeInput.value = notificationEndTime;
+
+        // 路線リストを初期化
         routeListContainer.innerHTML = ''; // コンテナをクリア
         if (routes.length > 0) {
             routes.forEach(route => {
@@ -189,7 +198,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const payload = {
                 userId: lineUserId,
-                routes: routesToSave
+                routes: routesToSave,
+                notificationStartTime: startTimeInput.value,
+                notificationEndTime: endTimeInput.value
             };
             
             displayMessage('保存中...', false);
