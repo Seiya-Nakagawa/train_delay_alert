@@ -60,6 +60,10 @@ h2 {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem; /* Match label font size */
+    -webkit-appearance: none; /* Disable iOS default styling */
+    color: #333; /* Set text color explicitly */
+    text-align: left; /* Ensure left alignment */
+    background-color: #fff; /* Explicitly set background */
 }
 
 #dayOfWeekContainer {
@@ -164,8 +168,7 @@ h2 {
 /* Add button with green accent */
 .add-row-btn {
     background-color: #00b140;
-    margin: 1rem auto 0; /* Centered */
-    display: block;
+    margin-top: 1rem; /* Reverted from centered */
 }
 
 .add-row-btn:hover {
