@@ -1,37 +1,35 @@
+/* Train-like Theme */
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
-    background-color: #f4f4f9;
+    background-color: #e9e9e9; /* Light gray, like a train exterior */
     color: #333;
 }
 
-.user-info {
-    max-width: 600px;
-    margin: 1rem auto 0;
-    padding: 0.5rem 2rem;
-    background-color: #e7f3ff;
-    border-left: 4px solid #4a90e2;
-    font-size: 0.9rem;
-}
-
-.container {
-    max-width: 600px;
-    margin: 1rem auto 2rem;
-    padding: 1rem 2rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
+/* Header styled like a destination board */
 header {
-    background-color: #4a90e2;
+    background-color: #333;
     color: white;
     padding: 1rem 0;
     text-align: center;
+    border-bottom: 4px solid #000;
 }
 
+/* Main container styled like a train window */
+.container {
+    max-width: 600px;
+    margin: 1.5rem auto 2rem;
+    padding: 1rem 2rem;
+    background-color: #fff;
+    border-radius: 12px; /* More rounded corners */
+    border: 4px solid #555; /* Thick, dark gray border */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Headings with green accent color (Yamanote Line) */
 h2 {
-    border-bottom: 2px solid #4a90e2;
+    border-bottom: 2px solid #00b140;
     padding-bottom: 0.5rem;
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
@@ -44,10 +42,9 @@ h2 {
     margin-bottom: 1rem;
 }
 
-#notificationTimeContainer {
-    /* display: flex; */
-    /* align-items: center; */
-    /* gap: 0.5rem; */
+/* --- Form Elements --- */
+
+#notificationTimeContainer, #dayOfWeekContainer {
     margin-bottom: 1.5rem;
 }
 
@@ -78,19 +75,23 @@ h2 {
     margin-right: 0.75rem;
 }
 
-
+/* Route list styling */
 #routeListContainer {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem; /* Increased gap */
     margin-bottom: 1rem;
 }
 
+/* Each route row as a separate panel */
 .route-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    position: relative; /* 候補リストの基準点とする */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
 }
 
 .route-input-wrapper {
@@ -98,6 +99,15 @@ h2 {
     position: relative;
 }
 
+.route-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Suggestions list styling */
 .suggestions-list {
     position: absolute;
     top: 100%;
@@ -121,67 +131,80 @@ h2 {
     background-color: #f0f0f0;
 }
 
-.route-input {
-    width: 100%; /* 親要素いっぱいに広げる */
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* paddingを含めて幅を計算 */
-}
+
+/* --- Buttons --- */
 
 .delete-row-btn, .add-row-btn {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 2rem;
-    height: 2rem;
-    font-size: 1.2rem;
+    width: 2.2rem; /* Slightly larger */
+    height: 2.2rem;
+    font-size: 1.4rem;
     font-weight: bold;
     border-radius: 50%;
-    border: none;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     cursor: pointer;
     color: white;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .delete-row-btn {
-    background-color: #e94e77;
+    background-color: #e94e77; /* Keep red for delete */
 }
 
 .delete-row-btn:hover {
     background-color: #c8335a;
+    transform: scale(1.05);
 }
 
+/* Add button with green accent */
 .add-row-btn {
-    background-color: #4a90e2;
-    margin-top: 1rem; /* 上マージンのみ */
+    background-color: #00b140;
+    margin: 1rem auto 0; /* Centered */
+    display: block;
 }
 
 .add-row-btn:hover {
-    background-color: #357abd;
+    background-color: #009a36; /* Darker green */
+    transform: scale(1.05);
 }
 
 .save-container {
-    text-align: center; /* 中のボタンを中央揃え */
-    margin-top: 1.5rem; /* +ボタンとのスペース */
+    text-align: center;
+    margin-top: 2rem;
 }
 
+/* Save button with green accent */
 .action-btn {
-    padding: 0.5rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.75rem 2rem; /* Larger padding */
+    font-size: 1.1rem;
     font-weight: bold;
-    border-radius: 4px;
+    border-radius: 8px; /* More rounded */
     border: none;
     cursor: pointer;
     color: white;
-    background-color: #28a745; /* 緑色 */
+    background-color: #00b140; /* Green accent */
     transition: background-color 0.3s;
     width: 80%;
     max-width: 300px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .action-btn:hover {
-    background-color: #218838;
+    background-color: #009a36; /* Darker green */
+}
+
+/* --- Other Elements --- */
+
+.user-info {
+    max-width: 600px;
+    margin: 1rem auto 0;
+    padding: 0.5rem 2rem;
+    background-color: #e6f7ec; /* Light green background */
+    border-left: 4px solid #00b140; /* Green accent */
+    font-size: 0.9rem;
 }
 
 footer {
@@ -195,15 +218,21 @@ footer {
     width: 100%;
 }
 
+#messageArea {
+    text-align: center;
+    padding: 2rem;
+}
+
 /* --- Responsive Styles for Mobile --- */
 @media (max-width: 600px) {
     body {
-        padding-bottom: 60px; /* フッターの高さ分 */
+        padding-bottom: 60px; /* Footer height */
     }
 
     .container {
         padding: 1rem;
         margin: 0.5rem;
+        border-width: 2px;
     }
 
     #timeInputs {
@@ -234,6 +263,7 @@ footer {
 
     .action-btn {
         width: 100%;
+        padding: 0.75rem 1rem;
     }
 
     footer {

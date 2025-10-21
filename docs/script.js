@@ -133,6 +133,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             checkbox.checked = notificationDays.includes(checkbox.value);
         });
 
+        // "毎日"チェックボックスの状態を更新
+        const dayEveryCheckbox = document.getElementById('dayEvery');
+        const individualDayCheckboxes = Array.from(dayOfWeekContainer.querySelectorAll('.dow-checkboxes input[type="checkbox"]:not(#dayEvery)'));
+        dayEveryCheckbox.checked = individualDayCheckboxes.length > 0 && individualDayCheckboxes.every(cb => cb.checked);
+
         // 路線リストを初期化
         routeListContainer.innerHTML = ''; // コンテナをクリア
         if (routes.length > 0) {
@@ -211,6 +216,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             timeInputs.style.display = allDayCheckbox.checked ? 'none' : '';
         });
 
+        // 曜日チェックボックス
+        const dayEveryCheckbox = document.getElementById('dayEvery');
+        const individualDayCheckboxes = Array.from(dayOfWeekContainer.querySelectorAll('.dow-checkboxes input[type="checkbox"]:not(#dayEvery)'));
+
+        dayEveryCheckbox.addEventListener('change', () => {
+            individualDayCheckboxes.forEach(checkbox => {
+                checkbox.checked = dayEveryCheckbox.checked;
+            });
+        });
+
+        individualDayCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                if (individualDayCheckboxes.every(cb => cb.checked)) {
+                    dayEveryCheckbox.checked = true;
+                } else {
+                    dayEveryCheckbox.checked = false;
+                }
+            });
+        });
+
         // 保存ボタン
         saveButton.addEventListener('click', async () => {
             // 路線
@@ -220,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .filter(route => route !== ''); // 空の入力は除外
 
             // 曜日
-            const dayCheckboxes = dayOfWeekContainer.querySelectorAll('input[type="checkbox"]');
+            const dayCheckboxes = dayOfWeekContainer.querySelectorAll('.dow-checkboxes input[type="checkbox"]:not(#dayEvery)');
             const selectedDays = Array.from(dayCheckboxes)
                 .filter(checkbox => checkbox.checked)
                 .map(checkbox => checkbox.value);

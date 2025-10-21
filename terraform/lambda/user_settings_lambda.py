@@ -225,6 +225,55 @@ def lambda_handler(event, context):
 
     # データ保存リクエストの判定
     elif 'userId' in body:
+        try:
+            print("aaaa")
+            print(body)
+            line_user_id = body.get('userId')
+            # DynamoDBのユーザ情報取得関数呼び出し
+            user_data = get_user_data(line_user_id)
+
+            if not user_data:
+                # --- ユーザーが見つからなかった場合 ---
+                print(f"ユーザーが見つかりません: {line_user_id}")
+                return {
+                    'statusCode': 404,
+                    'body': json.dumps({'message': 'ユーザーが見つかりません。'})
+                }
+
+            # --- ユーザー情報更新処理 ---
+            update_expression = "SET "
+            expression_attribute_values = {}
+            expression_attribute_names = {}
+
+            if 'routes' in body:
+                update_expression += "#r = :r, "
+                expression_attribute_values[':r'] = body['routes']
+                expression_attribute_names['#r'] = 'routes'
+
+            if 'notificationSettings' in body:
+                update_expression += "#ns = :ns, "
+                expression_attribute_values[':ns'] = body['notificationSettings']
+                expression_attribute_names['#ns'] = 'notificationSettings'
+
+            # updatedAtの更新
+            dt_now_iso = datetime.now(TIMEZONE).isoformat()
+            update_expression += "updatedAt = :u"
+            expression_attribute_values[':u'] = dt_now_iso
+
+            # DynamoDBの更新実行
+            table.update_item(
+                Key={'lineUserId': line_user_id},
+                UpdateExpression=update_expression,
+                ExpressionAttributeValues=expression_attribute_values,
+                ExpressionAttributeNames=expression_attribute_names
+            )
+
+            print(f"ユーザー情報を更新しました: {line_user_id}")
+
+            response_body = {'message': 'ユーザー情報を更新しました。'}
+
+        except Exception as e:
+            print(f"ERROR: ユーザー情報更新処理でエラーが発生しました: {e}")
         return 
 
     # どちらのパターンにも一致しない不正なリクエスト
