@@ -270,6 +270,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 inputElement.value = suggestion.line_name;
                 inputElement.dataset.lineCd = suggestion.line_cd;
                 suggestionsListElement.style.display = 'none'; // Hide after selection
+                // Manually clear error and validate after selection
+                inputElement.classList.remove('invalid');
+                inputElement.closest('.route-row').classList.remove('has-error');
+                validateRouteInput(inputElement); // Re-validate to ensure it's marked valid
             });
             suggestionsListElement.appendChild(item);
         });
@@ -435,7 +439,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             return true;
         }
 
-        const isValid = allRoutes.some(route => route.line_name === lineName);
+        // ユーザーがドロップダウンから選択したかどうかをチェック
+        // line_cdが設定されていれば、ドロップダウンから選択されたとみなす
+        const isSelectedFromDropdown = !!inputElement.dataset.lineCd;
+
+        // さらに、入力されたlineNameがallRoutesに存在するかを厳密にチェック
+        const isExactMatchInAllRoutes = allRoutes.some(route => route.line_name === lineName);
+
+        const isValid = isSelectedFromDropdown && isExactMatchInAllRoutes;
 
         if (isValid) {
             inputElement.classList.remove('invalid');
