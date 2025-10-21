@@ -168,7 +168,6 @@ def get_line_user_id(body):
     return line_user_id
 
 def get_user_data(line_user_id):
-    line_user_id = "test"
     try:
         response_userdata = table.get_item(
             Key={

@@ -59,12 +59,14 @@ h2 {
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
+    font-size: 1rem; /* Match label font size */
 }
 
 #dayOfWeekContainer {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem; /* Match mobile gap */
 }
 
 .dow-checkboxes input {
