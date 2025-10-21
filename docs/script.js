@@ -161,7 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.className = 'route-row';
 
         const wrapper = document.createElement('div');
-        wrapper.className = 'route-input-wrapper';
+        wrapper.className = 'route-input-wrapper'; // This wrapper will now contain the autocomplete-wrapper and error message
+
+        const autocompleteWrapper = document.createElement('div');
+        autocompleteWrapper.className = 'autocomplete-wrapper';
 
         const input = document.createElement('input');
         input.type = 'text';
@@ -178,10 +181,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const suggestionsList = document.createElement('div');
         suggestionsList.className = 'suggestions-list';
+        suggestionsList.style.display = 'none'; // Initially hidden
+
+        const dropdownButton = document.createElement('button');
+        dropdownButton.className = 'dropdown-button';
+        dropdownButton.innerHTML = '&#9660;'; // Down arrow character
+
+        dropdownButton.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent form submission
+            if (suggestionsList.style.display === 'none') {
+                showSuggestions(input, suggestionsList, true); // Pass true to force show all
+            } else {
+                suggestionsList.style.display = 'none';
+            }
+        });
+
+        input.addEventListener('focus', () => {
+            if (input.value.trim() === '') {
+                showSuggestions(input, suggestionsList, true); // Show all on focus if empty
+            }
+        });
+
+        input.addEventListener('blur', (e) => {
+            // Delay hiding to allow click on suggestion item
+            setTimeout(() => {
+                if (!suggestionsList.contains(document.activeElement)) { // Only hide if focus is not on suggestion list
+                    suggestionsList.style.display = 'none';
+                }
+            }, 100);
+            validateRouteInput(input);
+        });
+
+        const errorMessageElement = document.createElement('div'); // エラーメッセージ要素を追加
+        errorMessageElement.className = 'route-error-message';
+        errorMessageElement.textContent = '無効な路線名です。候補から選択してください。';
 
         input.addEventListener('input', () => {
             delete input.dataset.lineCd; // 手入力時にline_cdをクリア
             showSuggestions(input, suggestionsList);
+            // ユーザーが入力し始めたらエラー表示を消す
+            input.classList.remove('invalid');
+            row.classList.remove('has-error');
         });
         
         const deleteButton = document.createElement('button');
@@ -189,8 +229,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         deleteButton.className = 'delete-row-btn';
         deleteButton.addEventListener('click', () => row.remove());
 
-        wrapper.appendChild(input);
-        wrapper.appendChild(suggestionsList);
+        autocompleteWrapper.appendChild(input);
+        autocompleteWrapper.appendChild(dropdownButton);
+        autocompleteWrapper.appendChild(suggestionsList); // Suggestions list is now inside autocompleteWrapper
+
+        wrapper.appendChild(autocompleteWrapper);
+        wrapper.appendChild(errorMessageElement); // Error message is still directly in route-input-wrapper
         row.appendChild(wrapper);
         row.appendChild(deleteButton);
         return row;
@@ -199,23 +243,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * 入力内容に基づいて候補リストを表示する
      */
-    function showSuggestions(inputElement, suggestionsListElement) {
+    function showSuggestions(inputElement, suggestionsListElement, forceShow = false) {
         const value = inputElement.value.trim();
         suggestionsListElement.innerHTML = '';
-        if (value.length === 0 || allRoutes.length === 0) return;
 
-        const suggestions = allRoutes.filter(route => route.line_name.includes(value)).slice(0, 10);
+        let suggestions = [];
+        if (value.length === 0 && forceShow) {
+            suggestions = allRoutes.slice(0, 20); // Show top 20 if empty and forced
+        } else if (value.length > 0) {
+            suggestions = allRoutes.filter(route => route.line_name.includes(value)).slice(0, 10);
+        } else {
+            suggestionsListElement.style.display = 'none';
+            return;
+        }
+
+        if (suggestions.length === 0) {
+            suggestionsListElement.style.display = 'none';
+            return;
+        }
+
         suggestions.forEach(suggestion => {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
             item.textContent = suggestion.line_name;
-            item.addEventListener('mousedown', () => { // clickではなくmousedownを使うことでblurイベントより先に発火させる
+            item.addEventListener('mousedown', () => {
                 inputElement.value = suggestion.line_name;
-                inputElement.dataset.lineCd = suggestion.line_cd; // line_cdをdata属性に保存
-                suggestionsListElement.innerHTML = '';
+                inputElement.dataset.lineCd = suggestion.line_cd;
+                suggestionsListElement.style.display = 'none'; // Hide after selection
             });
             suggestionsListElement.appendChild(item);
         });
+        suggestionsListElement.style.display = 'block'; // Show the list
     }
 
     /**
@@ -249,8 +307,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 保存ボタン
         saveButton.addEventListener('click', async () => {
-            // 路線
             const routeInputs = document.querySelectorAll('.route-input');
+
+            // --- バリデーション ---
+            let hasValidationErrors = false;
+            routeInputs.forEach(input => {
+                // 空の入力はバリデーションしない（保存時にfilterで除外されるため）
+                if (input.value.trim() !== '') {
+                    const isValid = validateRouteInput(input);
+                    if (!isValid) {
+                        hasValidationErrors = true;
+                    }
+                }
+            });
+
+            if (hasValidationErrors) {
+                alert('無効な路線名があります。修正してください。');
+                return; // 保存処理を中断
+            }
+            // --- バリデーション終了 ---
+
+            // 路線
             const routesToSave = Array.from(routeInputs)
                 .map(input => {
                     const lineName = input.value.trim();
@@ -340,6 +417,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isError) {
             formContainer.style.display = 'none'; // エラー時はフォームを隠す
         }
+    }
+
+    /**
+     * ルート入力のバリデーションを行い、UIを更新する
+     * @param {HTMLElement} inputElement - バリデーション対象のinput要素
+     * @returns {boolean} 入力が有効であればtrue、無効であればfalse
+     */
+    function validateRouteInput(inputElement) {
+        const lineName = inputElement.value.trim();
+        const routeRow = inputElement.closest('.route-row');
+
+        if (lineName === '') {
+            // 空の場合はエラーなし
+            inputElement.classList.remove('invalid');
+            routeRow.classList.remove('has-error');
+            return true;
+        }
+
+        const isValid = allRoutes.some(route => route.line_name === lineName);
+
+        if (isValid) {
+            inputElement.classList.remove('invalid');
+            routeRow.classList.remove('has-error');
+        } else {
+            inputElement.classList.add('invalid');
+            routeRow.classList.add('has-error');
+        }
+        return isValid;
     }
 
     // --- すべての準備が整ったので、メイン処理を実行 ---

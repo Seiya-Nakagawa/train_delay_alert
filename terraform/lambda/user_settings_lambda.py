@@ -195,6 +195,8 @@ def post_user_data(body,line_user_id):
 def lambda_handler(event, context):
     body = json.loads(event.get('body', '{}'))
 
+    print(f"Received event: {json.dumps(body)}")
+
     # LINE Login後のアクセスか判定（ログイン後は認可コードがPOSTされる）
     if 'authorizationCode' in body:
         try:
@@ -225,6 +227,7 @@ def lambda_handler(event, context):
                 'statusCode': 200,
                 'body': json.dumps(user_data, ensure_ascii=False, default=str)
             }
+
         except Exception as e:
             print(f"ERROR: {e}")
             return {
@@ -233,31 +236,31 @@ def lambda_handler(event, context):
             }
 
     # データ保存リクエストの判定
-    elif 'userId' in body:
+    elif 'lineUserId' in body:
         try:
-            line_user_id = body.get('userId')
+            line_user_id = body.get('lineUserId')
 
             # DynamoDBのデータ更新関数呼び出し
             post_user_data(body,line_user_id)
 
             print(f"ユーザー情報を更新しました: {line_user_id}")
 
-            response_body = {'message': 'ユーザー情報を更新しました。'}
+            return {
+                'statusCode': 200,
+                'body': json.dumps(user_data, ensure_ascii=False, default=str)
+            }
 
         except Exception as e:
             print(f"ERROR: ユーザー情報更新処理でエラーが発生しました: {e}")
-        return 
+
 
     # どちらのパターンにも一致しない不正なリクエスト
     else:
-        print(f"ERROR: ユーザー情報取得処理でエラーが発生しました: {e}")
+        error_message = "不正なリクエストです。'authorizationCode'または'userId'が含まれていません。"
+        print(f"ERROR: {error_message}")
+        
+        # ステータスコードを400（Bad Request）に変更するのがより適切
         return {
-            'statusCode': 500,
-            'body': json.dumps({'message': 'ユーザー情報取得処理でエラーが発生しました。'})
+            'statusCode': 400,
+            'body': json.dumps({'message': error_message})
         }
-
-    # 成功レスポンス
-    return {
-        'statusCode': 200,
-        'body': json.dumps(response_body, ensure_ascii=False)
-    }
