@@ -159,9 +159,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     function createRouteRow(routeData = { line_name: '', line_cd: '' }) {
         const row = document.createElement('div');
         row.className = 'route-row';
+        row.classList.remove('has-error'); // 初期状態でエラー表示が出ないようにする
 
         const wrapper = document.createElement('div');
-        wrapper.className = 'route-input-wrapper'; // This wrapper will now contain the autocomplete-wrapper and error message
+        wrapper.className = 'route-input-wrapper';
 
         const autocompleteWrapper = document.createElement('div');
         autocompleteWrapper.className = 'autocomplete-wrapper';
@@ -209,19 +210,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     suggestionsList.style.display = 'none';
                 }
             }, 100);
-            validateRouteInput(input);
         });
-
-        const errorMessageElement = document.createElement('div'); // エラーメッセージ要素を追加
-        errorMessageElement.className = 'route-error-message';
-        errorMessageElement.textContent = '無効な路線名です。候補から選択してください。';
 
         input.addEventListener('input', () => {
             delete input.dataset.lineCd; // 手入力時にline_cdをクリア
             showSuggestions(input, suggestionsList);
-            // ユーザーが入力し始めたらエラー表示を消す
-            input.classList.remove('invalid');
-            row.classList.remove('has-error');
         });
         
         const deleteButton = document.createElement('button');
@@ -234,7 +227,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         autocompleteWrapper.appendChild(suggestionsList); // Suggestions list is now inside autocompleteWrapper
 
         wrapper.appendChild(autocompleteWrapper);
-        wrapper.appendChild(errorMessageElement); // Error message is still directly in route-input-wrapper
         row.appendChild(wrapper);
         row.appendChild(deleteButton);
         return row;
@@ -314,19 +306,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             const routeInputs = document.querySelectorAll('.route-input');
 
             // --- バリデーション ---
-            let hasValidationErrors = false;
-            routeInputs.forEach(input => {
-                // 空の入力はバリデーションしない（保存時にfilterで除外されるため）
-                if (input.value.trim() !== '') {
-                    const isValid = validateRouteInput(input);
-                    if (!isValid) {
-                        hasValidationErrors = true;
-                    }
-                }
-            });
+            const invalidRoutes = [];
+            const routesToValidate = Array.from(routeInputs)
+                .map(input => {
+                    const lineName = input.value.trim();
+                    if (lineName === '') return null; // 空の入力はバリデーション対象外
 
-            if (hasValidationErrors) {
-                alert('無効な路線名があります。修正してください。');
+                    const isSelectedFromDropdown = !!input.dataset.lineCd;
+                    const isExactMatchInAllRoutes = allRoutes.some(route => route.line_name === lineName);
+
+                    if (!(isSelectedFromDropdown && isExactMatchInAllRoutes)) {
+                        return lineName; // 無効な路線名を収集
+                    }
+                    return null; // 有効な場合はnull
+                })
+                .filter(name => name !== null); // 無効な路線名のみを抽出
+
+            if (routesToValidate.length > 0) {
+                alert(`以下の路線は登録できません。候補から選択してください。\n${routesToValidate.join('\n')}`);
                 return; // 保存処理を中断
             }
             // --- バリデーション終了 ---
@@ -348,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     return { line_name: lineName, line_cd: lineCd };
                 })
-                .filter(route => route !== null); // Filter out empty rows
+                .filter(route => route !== null); // 空の入力は除外
 
             // 曜日
             const dayCheckboxes = dayOfWeekContainer.querySelectorAll('.dow-checkboxes input[type="checkbox"]:not(#dayEvery)');
@@ -421,41 +418,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isError) {
             formContainer.style.display = 'none'; // エラー時はフォームを隠す
         }
-    }
-
-    /**
-     * ルート入力のバリデーションを行い、UIを更新する
-     * @param {HTMLElement} inputElement - バリデーション対象のinput要素
-     * @returns {boolean} 入力が有効であればtrue、無効であればfalse
-     */
-    function validateRouteInput(inputElement) {
-        const lineName = inputElement.value.trim();
-        const routeRow = inputElement.closest('.route-row');
-
-        if (lineName === '') {
-            // 空の場合はエラーなし
-            inputElement.classList.remove('invalid');
-            routeRow.classList.remove('has-error');
-            return true;
-        }
-
-        // ユーザーがドロップダウンから選択したかどうかをチェック
-        // line_cdが設定されていれば、ドロップダウンから選択されたとみなす
-        const isSelectedFromDropdown = !!inputElement.dataset.lineCd;
-
-        // さらに、入力されたlineNameがallRoutesに存在するかを厳密にチェック
-        const isExactMatchInAllRoutes = allRoutes.some(route => route.line_name === lineName);
-
-        const isValid = isSelectedFromDropdown && isExactMatchInAllRoutes;
-
-        if (isValid) {
-            inputElement.classList.remove('invalid');
-            routeRow.classList.remove('has-error');
-        } else {
-            inputElement.classList.add('invalid');
-            routeRow.classList.add('has-error');
-        }
-        return isValid;
     }
 
     // --- すべての準備が整ったので、メイン処理を実行 ---
