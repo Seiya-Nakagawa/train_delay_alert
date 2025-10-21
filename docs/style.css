@@ -168,7 +168,8 @@ h2 {
 /* Add button with green accent */
 .add-row-btn {
     background-color: #00b140;
-    margin-top: 1rem; /* Reverted from centered */
+    margin: 1rem auto 0; /* Centered */
+    display: block;
 }
 
 .add-row-btn:hover {
