@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      * @param {string} value - 入力欄の初期値
      * @returns {HTMLElement} 生成された行のDIV要素
      */
-    function createRouteRow(value = '') {
+    function createRouteRow(routeData = { line_name: '', line_cd: '' }) {
         const row = document.createElement('div');
         row.className = 'route-row';
 
@@ -166,13 +166,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'route-input';
-        input.value = value;
         input.placeholder = '路線名を入力';
         
+        // 渡されたデータで入力欄を初期化
+        const routeName = typeof routeData === 'string' ? routeData : routeData.line_name;
+        const routeCode = typeof routeData === 'string' ? '' : routeData.line_cd;
+        input.value = routeName;
+        if (routeCode) {
+            input.dataset.lineCd = routeCode;
+        }
+
         const suggestionsList = document.createElement('div');
         suggestionsList.className = 'suggestions-list';
 
-        input.addEventListener('input', () => showSuggestions(input, suggestionsList));
+        input.addEventListener('input', () => {
+            delete input.dataset.lineCd; // 手入力時にline_cdをクリア
+            showSuggestions(input, suggestionsList);
+        });
         
         const deleteButton = document.createElement('button');
         deleteButton.textContent = '-';
@@ -201,6 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             item.textContent = suggestion.line_name;
             item.addEventListener('mousedown', () => { // clickではなくmousedownを使うことでblurイベントより先に発火させる
                 inputElement.value = suggestion.line_name;
+                inputElement.dataset.lineCd = suggestion.line_cd; // line_cdをdata属性に保存
                 suggestionsListElement.innerHTML = '';
             });
             suggestionsListElement.appendChild(item);
@@ -241,8 +252,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 路線
             const routeInputs = document.querySelectorAll('.route-input');
             const routesToSave = Array.from(routeInputs)
-                .map(input => input.value.trim())
-                .filter(route => route !== ''); // 空の入力は除外
+                .map(input => {
+                    const lineName = input.value.trim();
+                    if (lineName === '') return null;
+
+                    let lineCd = input.dataset.lineCd || null;
+
+                    // If line_cd is missing (manual input), try to find it
+                    if (!lineCd) {
+                        const foundRoute = allRoutes.find(route => route.line_name === lineName);
+                        if (foundRoute) {
+                            lineCd = foundRoute.line_cd;
+                        }
+                    }
+                    return { line_name: lineName, line_cd: lineCd };
+                })
+                .filter(route => route !== null); // Filter out empty rows
 
             // 曜日
             const dayCheckboxes = dayOfWeekContainer.querySelectorAll('.dow-checkboxes input[type="checkbox"]:not(#dayEvery)');
