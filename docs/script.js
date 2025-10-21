@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .map(checkbox => checkbox.value);
 
             const payload = {
-                userId: lineUserId,
+                lineUserId: lineUserId,
                 routes: routesToSave,
                 notificationStartTime: startTimeInput.value,
                 notificationEndTime: endTimeInput.value,
