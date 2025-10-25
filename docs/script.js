@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function main() {
         // 1. 全路線データを非同期で読み込む
-        loadAllRoutes(); 
+        loadAllRoutes();
 
         // 2. URLから認可コードを取得
         const params = new URLSearchParams(window.location.search);
@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         // userDataが取得できたか、また必須のlineUserIdが含まれているかを確認
         if (userData && userData.lineUserId) {
             lineUserId = userData.lineUserId;
-            
+
             // 4. ユーザー情報を画面に表示
             // userIdSpan.textContent = lineUserId;
             // userInfoDiv.style.display = 'block';
 
             // 5. 取得したデータでフォームを初期化
             initializeSettings(userData);
-            
+
             // 6. フォームを表示し、メッセージエリアを非表示にする
             formContainer.style.display = 'block';
             messageArea.style.display = 'none';
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) {
                 throw new Error(`Lambdaからの応答エラー: ${response.status}`);
             }
-            
+
             const data = await response.json();
             console.log('Lambdaからの応答:', data);
             return data; // 例: { userId: 'U123...', routes: ['山手線'] }
@@ -113,9 +113,9 @@ document.addEventListener('DOMContentLoaded', async () => {
      * @param {object} userData - ユーザー情報
      */
     function initializeSettings(userData) {
-        const { 
-            routes = [], 
-            notificationStartTime = '07:00', 
+        const {
+            routes = [],
+            notificationStartTime = '07:00',
             notificationEndTime = '09:00',
             isAllDay = false,
             notificationDays = ['mon', 'tue', 'wed', 'thu', 'fri'] // デフォルトは平日
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         input.type = 'text';
         input.className = 'route-input';
         input.placeholder = '路線名を入力';
-        
+
         // 渡されたデータで入力欄を初期化
         const routeName = typeof routeData === 'string' ? routeData : routeData.line_name;
         const routeCode = typeof routeData === 'string' ? '' : routeData.line_cd;
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             delete input.dataset.lineCd; // 手入力時にline_cdをクリア
             showSuggestions(input, suggestionsList);
         });
-        
+
         const deleteButton = document.createElement('button');
         deleteButton.textContent = '-';
         deleteButton.className = 'delete-row-btn';
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.appendChild(deleteButton);
         return row;
     }
-    
+
     /**
      * 入力内容に基づいて候補リストを表示する
      */
@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 isAllDay: allDayCheckbox.checked,
                 notificationDays: selectedDays
             };
-            
+
             displayMessage('保存中...', false);
             formContainer.style.display = 'none'; // 保存中はフォームを非表示
 
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (!response.ok) throw new Error('保存に失敗しました');
 
                 displayMessage('保存しました！', false);
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-    
+
     /**
      * ユーザーへのメッセージを表示する
      * @param {string} text - 表示するメッセージ
