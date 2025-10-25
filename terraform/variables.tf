@@ -1,15 +1,14 @@
+# =============================================================================
+# Variables
+# =============================================================================
+# このTerraform構成で使用される変数を定義します。
+# tfvarsファイルや環境変数から値を注入できます。
+
+# -----------------------------------------------------------------------------
+# AWS General
+# -----------------------------------------------------------------------------
 variable "aws_region" {
   description = "デプロイするAWSリージョン"
-  type        = string
-}
-
-variable "system_name" {
-  description = "システム識別子"
-  type        = string
-}
-
-variable "env" {
-  description = "環境識別子"
   type        = string
 }
 
@@ -18,6 +17,22 @@ variable "aws_account_id" {
   type        = string
 }
 
+# -----------------------------------------------------------------------------
+# Project General
+# -----------------------------------------------------------------------------
+variable "system_name" {
+  description = "システム識別子 (例: train-delay-alert)"
+  type        = string
+}
+
+variable "env" {
+  description = "環境識別子 (例: prd, stg, dev)"
+  type        = string
+}
+
+# -----------------------------------------------------------------------------
+# Lambda
+# -----------------------------------------------------------------------------
 variable "lambda_runtime_version" {
   description = "Lambdaランタイムのバージョン"
   type        = list(string)
@@ -34,23 +49,29 @@ variable "lambda_memory_size" {
 }
 
 variable "lambda_log_level" {
-  description = "Lambdaのログレベル"
+  description = "Lambdaのログレベル (未使用)"
   type        = string
 }
 
+# -----------------------------------------------------------------------------
+# Notification
+# -----------------------------------------------------------------------------
 variable "notification_emails" {
-  description = "通知を受け取るメールアドレスのリスト"
+  description = "システムアラート通知を受け取るメールアドレスのリスト"
   type        = list(string)
   default     = []
 }
 
+# -----------------------------------------------------------------------------
+# Frontend & LINE
+# -----------------------------------------------------------------------------
 variable "frontend_redirect_url" {
-  description = "フロントエンドのURL"
+  description = "LINEログイン後にリダイレクトされるフロントエンドのURL"
   type        = string
 }
 
 variable "frontend_origin" {
-  description = "フロントエンドのオリジン"
+  description = "CORS許可対象となるフロントエンドのオリジン"
   type        = string
 }
 

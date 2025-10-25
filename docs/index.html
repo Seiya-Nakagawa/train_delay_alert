@@ -1,74 +1,95 @@
+<!--
+  路線遅延通知システム フロントエンド
+  このHTMLファイルは、ユーザーが遅延通知を設定するためのUIを提供します。
+-->
 <!DOCTYPE html>
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>路線遅延通知システム</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>路線遅延通知システム</title>
+  <!-- スタイルシートの読み込み -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
-        <h1>路線遅延通知システム</h1>
-    </header>
-    <main>
-        <div id="userInfo" class="user-info" style="display: none;">
-            <p>LINE User ID: <span id="userId"></span></p>
-        </div>
+  <!-- ヘッダー: ページタイトル -->
+  <header>
+    <h1>路線遅延通知システム</h1>
+  </header>
 
-        <!-- ▼▼▼ ここから追加 ▼▼▼ -->
-        <div id="messageArea">
-            <p id="messageText">ユーザー情報を読み込んでいます...</p>
-        </div>
-        <!-- ▲▲▲ ここまで追加 ▲▲▲ -->
+  <!-- メインコンテンツ -->
+  <main>
+    <!-- ユーザー情報表示エリア (通常は非表示) -->
+    <div id="userInfo" class="user-info" style="display: none;">
+      <p>LINE User ID: <span id="userId"></span></p>
+    </div>
 
-        <!-- ↓↓↓ フォームコンテナで全体を囲むように変更 ↓↓↓ -->
-        <div id="formContainer" class="container" style="display: none;">
-            <h2>登録路線</h2>
-            <p class="description">最大5つまで登録できます。</p>
-            <div id="routeListContainer">
-                <!-- 登録された路線がここに追加されます -->
-            </div>
-            <button id="addRowButton" class="add-row-btn">+</button>
+    <!-- メッセージ表示エリア: 読み込み中やエラーメッセージを表示 -->
+    <div id="messageArea">
+      <p id="messageText">ユーザー情報を読み込んでいます...</p>
+    </div>
 
-            <h2>通知時間帯</h2>
-            <div id="notificationTimeContainer">
-                <div>
-                    <input type="checkbox" id="allDayCheckbox" class="time-setting-checkbox">
-                    <label for="allDayCheckbox">全時間帯を対象にする</label>
-                </div>
-                <div id="timeInputs">
-                    <label for="startTime">開始時刻:</label>
-                    <input type="time" id="startTime">
-                    <label for="endTime">終了時刻:</label>
-                    <input type="time" id="endTime">
-                </div>
-                <div id="dayOfWeekContainer">
-                    <div>
-                        <input type="checkbox" id="dayEvery" value="every"><label for="dayEvery">毎日</label>
-                    </div>
-                    <div class="dow-checkboxes">
-                        <input type="checkbox" id="dayMon" value="mon"><label for="dayMon">月</label>
-                        <input type="checkbox" id="dayTue" value="tue"><label for="dayTue">火</label>
-                        <input type="checkbox" id="dayWed" value="wed"><label for="dayWed">水</label>
-                        <input type="checkbox" id="dayThu" value="thu"><label for="dayThu">木</label>
-                        <input type="checkbox" id="dayFri" value="fri"><label for="dayFri">金</label>
-                        <input type="checkbox" id="daySat" value="sat"><label for="daySat">土</label>
-                        <input type="checkbox" id="daySun" value="sun"><label for="daySun">日</label>
-                    </div>
-                </div>
-            </div>
-            <div class="save-container">
-                <button id="saveButton" class="action-btn">保存</button>
-            </div>
+    <!-- 設定フォーム全体 (初期状態では非表示) -->
+    <div id="formContainer" class="container" style="display: none;">
+      <!-- 路線登録セクション -->
+      <h2>登録路線</h2>
+      <p class="description">最大5つまで登録できます。</p>
+      <!-- 路線入力欄が動的に追加されるコンテナ -->
+      <div id="routeListContainer">
+        <!-- 登録された路線がここに追加されます -->
+      </div>
+      <!-- 路線入力欄を追加するボタン -->
+      <button id="addRowButton" class="add-row-btn">+</button>
+
+      <!-- 通知時間帯設定セクション -->
+      <h2>通知時間帯</h2>
+      <div id="notificationTimeContainer">
+        <!-- 全時間帯チェックボックス -->
+        <div>
+          <input type="checkbox" id="allDayCheckbox" class="time-setting-checkbox">
+          <label for="allDayCheckbox">全時間帯を対象にする</label>
         </div>
-    </main>
-    <footer>
-        <p>&copy; 2025 train_delay_alert</p>
-    </footer>
-    <script src="config.js"></script>
-    <script src="script.js"></script>
+        <!-- 時間指定入力欄 -->
+        <div id="timeInputs">
+          <label for="startTime">開始時刻:</label>
+          <input type="time" id="startTime">
+          <label for="endTime">終了時刻:</label>
+          <input type="time" id="endTime">
+        </div>
+        <!-- 曜日指定チェックボックス -->
+        <div id="dayOfWeekContainer">
+          <div>
+            <input type="checkbox" id="dayEvery" value="every"><label for="dayEvery">毎日</label>
+          </div>
+          <div class="dow-checkboxes">
+            <input type="checkbox" id="dayMon" value="mon"><label for="dayMon">月</label>
+            <input type="checkbox" id="dayTue" value="tue"><label for="dayTue">火</label>
+            <input type="checkbox" id="dayWed" value="wed"><label for="dayWed">水</label>
+            <input type="checkbox" id="dayThu" value="thu"><label for="dayThu">木</label>
+            <input type="checkbox" id="dayFri" value="fri"><label for="dayFri">金</label>
+            <input type="checkbox" id="daySat" value="sat"><label for="daySat">土</label>
+            <input type="checkbox" id="daySun" value="sun"><label for="daySun">日</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 保存ボタン -->
+      <div class="save-container">
+        <button id="saveButton" class="action-btn">保存</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- フッター -->
+  <footer>
+    <p>&copy; 2025 train_delay_alert</p>
+  </footer>
+
+  <!-- JavaScriptファイルの読み込み -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 
 </html>

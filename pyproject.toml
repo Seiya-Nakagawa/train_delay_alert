@@ -1,0 +1,22 @@
+# pyproject.toml
+
+# --- Blackの設定 ---
+# Blackはデフォルトで88文字なので、明示的に書かなくてもOKですが、
+# 設定ファイルに記述しておくと分かりやすいです。
+[tool.black]
+line-length = 88
+
+# --- Flake8の設定 ---
+# Flake8にBlackと協調するように設定します。
+[tool.flake8]
+# 1行の最大文字数をBlackに合わせて88文字に
+max-line-length = 88
+# Blackと競合する警告を無視する
+# E203: スライスのコロンの前に空白を入れるかどうかで競合
+# W503: 二項演算子の前で改行するかどうかで競合
+extend-ignore = ["E203", "W503"]
+
+# --- isortの設定 ---
+# Blackと互換性のあるプロファイルを使用します。
+[tool.isort]
+profile = "black"

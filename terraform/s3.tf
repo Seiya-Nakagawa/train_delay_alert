@@ -1,4 +1,13 @@
+# =============================================================================
+# S3 (Simple Storage Service)
+# =============================================================================
+# LambdaレイヤーのZIPファイルなどを保管するためのS3バケットを定義します。
+
+# -----------------------------------------------------------------------------
+# S3 Bucket
+# -----------------------------------------------------------------------------
 resource "aws_s3_bucket" "s3_train_alert" {
+  # バケット名 (グローバルで一意である必要があります)
   bucket = "${var.system_name}-${var.env}-s3"
 
   tags = {
@@ -8,7 +17,11 @@ resource "aws_s3_bucket" "s3_train_alert" {
   }
 }
 
-## 暗号化
+# -----------------------------------------------------------------------------
+# S3 Bucket Configuration
+# -----------------------------------------------------------------------------
+
+# サーバーサイド暗号化 (SSE-S3) を有効化
 resource "aws_s3_bucket_server_side_encryption_configuration" "s3_encryption_train_alert" {
   bucket = aws_s3_bucket.s3_train_alert.id
   rule {
@@ -18,7 +31,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_encryption_tra
   }
 }
 
-## バージョニング設定
+# バージョニングを有効化
+# オブジェクトの変更履歴を保持します。
 resource "aws_s3_bucket_versioning" "versioning_train_alert_results" {
   bucket = aws_s3_bucket.s3_train_alert.id
   versioning_configuration {
@@ -26,40 +40,9 @@ resource "aws_s3_bucket_versioning" "versioning_train_alert_results" {
   }
 }
 
-resource "aws_s3_object" "folders" {
-  # for_eachに、上で定義したフォルダ名のセットを渡します
-  for_each = local.s3_folder_names
-
-  # フォルダを作成したいバケットのIDを指定
-  bucket = aws_s3_bucket.s3_train_alert.id
-
-  # each.keyには、"gas_url/"、"processed_files/"などのフォルダ名が順番に入ります
-  key = each.key
-
-  # フォルダであることを示すContent-Type
-  content_type = "application/x-directory"
-
-  # 中身は空
-  content = ""
-
-  # 空のコンテンツのMD5ハッシュ値を指定
-  etag = md5("")
-}
-
-# 2. ローカルのZIPファイルをS3にアップロードするリソース
-resource "aws_s3_object" "lambda_layer_zip" {
-  # 依存関係: バケットが作成された後に実行される
-  bucket = aws_s3_bucket.s3_train_alert.id
-  key    = "lambda-layers/python_libraries.zip" # S3内でのファイルパス
-  source = local.lambda_layer_zip_path # ローカルのZIPファイルのパス
-
-  # ファイルの内容が変わった時だけ再アップロードするための設定
-  etag = filemd5(local.lambda_layer_zip_path)
-}
-
-# ライフサイクルルール (最新3世代を保持)
+# ライフサイクルルール (最新3世代以外の古いバージョンを削除)
 resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_train_alert" {
-  # ライフサイクルルールはバージョニングが有効になっている必要があるため、depends_onを追加します
+  # バージョニングが有効化された後にこのリソースが作成されるように依存関係を設定
   depends_on = [aws_s3_bucket_versioning.versioning_train_alert_results]
 
   bucket = aws_s3_bucket.s3_train_alert.id
@@ -73,8 +56,40 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_train_alert" {
 
     # 非現行（古い）バージョンのオブジェクトに対するアクション
     noncurrent_version_expiration {
-      noncurrent_days = 1
-      newer_noncurrent_versions = 2
+      noncurrent_days = 1 # 1日経過した非現行バージョンを対象
+      newer_noncurrent_versions = 2 # 最新の非現行バージョンを2つ保持
     }
   }
+}
+
+# -----------------------------------------------------------------------------
+# S3 Objects
+# -----------------------------------------------------------------------------
+
+# S3バケット内にフォルダを作成
+resource "aws_s3_object" "folders" {
+  # local.s3_folder_namesの各要素に対してリソースを作成
+  for_each = local.s3_folder_names
+
+  bucket = aws_s3_bucket.s3_train_alert.id
+
+  # キーの末尾に "/" をつけることでフォルダとして扱われる
+  key = each.key
+
+  # フォルダであることを示すContent-Type
+  content_type = "application/x-directory"
+
+  # 空のコンテンツのMD5ハッシュ値を指定
+  etag = md5("")
+}
+
+# LambdaレイヤーのZIPファイルをS3にアップロード
+resource "aws_s3_object" "lambda_layer_zip" {
+  bucket = aws_s3_bucket.s3_train_alert.id
+  key    = "lambda-layers/python_libraries.zip" # S3内でのオブジェクトキー
+  source = local.lambda_layer_zip_path          # アップロードするローカルファイルのパス
+
+  # ローカルファイルのMD5ハッシュ値をetagとして使用
+  # ファイルの内容が変更された場合のみ、S3オブジェクトが再作成（再アップロード）されます。
+  etag = filemd5(local.lambda_layer_zip_path)
 }
