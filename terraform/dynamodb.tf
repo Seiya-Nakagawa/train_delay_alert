@@ -21,6 +21,12 @@ resource "aws_dynamodb_table" "users" {
     type = "S" # String
   }
 
+  attribute {
+    name = "routes"
+    type = "S"
+  }
+
+
   # GSI (Global Secondary Index) の設定
   global_secondary_index {
     name            = "routesIndex"

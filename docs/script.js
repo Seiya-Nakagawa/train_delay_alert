@@ -322,11 +322,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           const lineName = input.value.trim();
           if (lineName === '') return null; // 空の入力は無視
 
-          // 候補から選択されているか、または手入力が完全一致するか
-          const isSelectedFromDropdown = !!input.dataset.lineCd;
+          // 路線名がリストに存在するかどうかで検証
           const isExactMatchInAllRoutes = allRoutes.some(route => route.line_name === lineName);
 
-          if (!(isSelectedFromDropdown && isExactMatchInAllRoutes)) {
+          if (!isExactMatchInAllRoutes) {
             return lineName; // 無効な路線名を収集
           }
           return null;
@@ -335,26 +334,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (routesToValidate.length > 0) {
         alert(`以下の路線は登録できません。候補から選択してください。
-${routesToValidate.join('
-')}`);
+        ${routesToValidate.join('')}`);
         return; // バリデーションエラーがあれば保存を中断
       }
 
       // --- 保存データの準備 ---
       const routesToSave = Array.from(routeInputs)
-        .map(input => {
-          const lineName = input.value.trim();
-          if (lineName === '') return null;
-
-          let lineCd = input.dataset.lineCd || null;
-          // 路線コードがない場合、路線名から再検索
-          if (!lineCd) {
-            const foundRoute = allRoutes.find(route => route.line_name === lineName);
-            if (foundRoute) lineCd = foundRoute.line_cd;
-          }
-          return { line_name: lineName, line_cd: lineCd };
-        })
-        .filter(route => route !== null);
+        .map(input => input.value.trim())
+        .filter(lineName => lineName !== '');
 
       const selectedDays = Array.from(dayOfWeekContainer.querySelectorAll('.dow-checkboxes input:checked'))
         .map(checkbox => checkbox.value);
