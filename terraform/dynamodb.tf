@@ -21,6 +21,13 @@ resource "aws_dynamodb_table" "users" {
     type = "S" # String
   }
 
+  # GSI (Global Secondary Index) の設定
+  global_secondary_index {
+    name            = "routesIndex"
+    hash_key        = "routes"
+    projection_type = "ALL" # 全ての属性をインデックスにプロジェクションする
+  }
+
   # TTL (Time To Live) の設定
   # 有効期限が切れたアイテムを自動的に削除します。
   ttl {
@@ -66,7 +73,7 @@ resource "aws_dynamodb_table" "train_status" {
   server_side_encryption {
     enabled = true
   }
-  
+
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-train-status"
   })

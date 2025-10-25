@@ -26,7 +26,7 @@ LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = os.environ.get(
     "LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME"
 )
 LINE_CHANNEL_SECRET_PARAM_NAME = os.environ.get("LINE_CHANNEL_SECRET_PARAM_NAME")
-TABLE_NAME = os.environ.get("TABLE_NAME")
+USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME")
 FRONTEND_REDIRECT_URL = os.environ.get("FRONTEND_REDIRECT_URL")
 FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN")  # CORSで使用
 
@@ -40,7 +40,7 @@ TIMEZONE = timezone(timedelta(hours=+9), "JST")
 # AWSサービスクライアントの初期化
 ssm_client = boto3.client("ssm")
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(TABLE_NAME)
+table = dynamodb.Table(USER_TABLE_NAME)
 
 
 # --- ヘルパー関数 ---

@@ -52,7 +52,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
       LINE_CHANNEL_ID                      = var.line_channel_id
       LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = aws_ssm_parameter.line_channel_access_token.name
       LINE_CHANNEL_SECRET_PARAM_NAME       = aws_ssm_parameter.line_channel_secret.name
-      TABLE_NAME                           = aws_dynamodb_table.users.name
+      USER_TABLE_NAME                      = aws_dynamodb_table.users.name
       FRONTEND_REDIRECT_URL                = var.frontend_redirect_url
       FRONTEND_ORIGIN                      = var.frontend_origin
     }
@@ -103,6 +103,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
       TRAIN_STATUS_TABLE_NAME        = aws_dynamodb_table.train_status.name
       TRAFFIC_API_TOKEN_NAME         = aws_ssm_parameter.traffic_api_token.name
       LINE_CHANNEL_ACCESS_TOKEN_NAME = aws_ssm_parameter.line_channel_access_token.name
+      USER_TABLE_NAME                = aws_dynamodb_table.users.name
     }
   }
 
