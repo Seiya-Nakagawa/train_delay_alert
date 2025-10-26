@@ -4,34 +4,47 @@
 # アプリケーションのデータを格納するためのDynamoDBテーブルを定義します。
 
 # -----------------------------------------------------------------------------
-# Users Table
+# Users Table (データモデル変更版)
 # -----------------------------------------------------------------------------
-# ユーザーの設定情報（LINEユーザーID、登録路線、通知設定など）を格納します。
+# ユーザーの設定情報と登録路線を格納します。
+# 1ユーザーが複数のアイテム（プロフィール用x1, 路線用xN）を持つデータモデルです。
+#
+# ⚠️ 注意: このスキーマ変更はテーブルの再作成を伴うため、既存のデータはすべて削除されます。
+#
 resource "aws_dynamodb_table" "users" {
   name         = "${local.name_prefix}-users"
   billing_mode = "PAY_PER_REQUEST" # リクエストごとの課金
-  hash_key     = "lineUserId"      # パーティションキー
+
+  # 複合プライマリキー (Composite Primary Key) を設定
+  # これにより、1人のユーザーが複数のアイテム（設定情報や路線情報）を持つことができます。
+  hash_key  = "lineUserId"     # パーティションキー: ユーザーを一意に識別
+  range_key = "settingOrRoute" # ソートキー: ユーザー内のアイテムを区別（例: "#PROFILE#" や "JR山手線"）
 
   # 誤削除防止
   deletion_protection_enabled = true
 
-  # 属性の定義
+  # プライマリキーとGSIで使用する属性をすべて定義します
   attribute {
     name = "lineUserId"
     type = "S" # String
   }
-
   attribute {
-    name = "routes"
-    type = "S"
+    name = "settingOrRoute"
+    type = "S" # String
   }
 
-
   # GSI (Global Secondary Index) の設定
+  # 路線名(settingOrRoute)からユーザー(lineUserId)を逆引き検索するために使用します。
+  # これにより、check_delay_lambdaが効率的に通知対象ユーザーを検索できます。
   global_secondary_index {
-    name            = "routesIndex"
-    hash_key        = "routes"
-    projection_type = "ALL" # 全ての属性をインデックスにプロジェクションする
+    name = "route-index" # 新しいインデックス名
+
+    # GSIのキー構成 (プライマリキーの逆)
+    hash_key  = "settingOrRoute"
+    range_key = "lineUserId"
+
+    # インデックスにはキー属性のみを含めることで、効率とコストを最適化します。
+    projection_type = "KEYS_ONLY"
   }
 
   # TTL (Time To Live) の設定
