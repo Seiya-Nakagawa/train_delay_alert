@@ -199,12 +199,27 @@ def lambda_handler(event, context):
 
         # 1. LINEログイン後の初回アクセス（認可コードが含まれる）
         if "authorizationCode" in body:
-            line_user_id = get_line_user_id(body)
-            user_data = get_user_data(line_user_id)
+            try:
+                print("LINEユーザーIDの取得を開始します。")
+                line_user_id = get_line_user_id(body)
+                print(f"LINEユーザーIDの取得に成功しました: {line_user_id}")
+            except Exception as e:
+                print(f"CRITICAL: get_line_user_idでエラーが発生しました: {e}")
+                raise
+
+            try:
+                print(f"{line_user_id} のユーザーデータをDynamoDBから取得します。")
+                user_data = get_user_data(line_user_id)
+                print("DynamoDBからのデータ取得が完了しました。")
+            except Exception as e:
+                print(f"CRITICAL: get_user_dataでエラーが発生しました: {e}")
+                raise
 
             # 新規ユーザーの場合、デフォルトのデータ構造を作成
             if not user_data:
-                print(f"新規ユーザーです。lineUserId: {line_user_id}")
+                print(
+                    f"新規ユーザーです。デフォルトデータを作成します。lineUserId: {line_user_id}"
+                )
                 user_data = {
                     "lineUserId": line_user_id,
                     "routes": [],
@@ -214,6 +229,7 @@ def lambda_handler(event, context):
                     "notificationDays": ["mon", "tue", "wed", "thu", "fri"],
                 }
 
+            print("ユーザーデータの取得/作成に成功しました。レスポンスを返します。")
             return {
                 "statusCode": 200,
                 "headers": headers,
@@ -222,6 +238,22 @@ def lambda_handler(event, context):
 
         # 2. ユーザーによる設定情報の保存・更新（ユーザーIDが含まれる）
         elif "lineUserId" in body:
+            # フロントエンドから送られてくる路線情報が { key: '...', name: '...' } のような
+            # オブジェクトの配列である場合、後方互換性のために路線名だけの配列に変換する
+            if (
+                "routes" in body
+                and body["routes"]
+                and isinstance(body["routes"][0], dict)
+            ):
+                print(
+                    "古い形式の路線データ（オブジェクト配列）を検出しました。文字列配列に変換します。"
+                )
+                body["routes"] = [
+                    route["line_name"]
+                    for route in body["routes"]
+                    if "line_name" in route
+                ]
+
             post_user_data(body)
             print(f"ユーザー情報を更新しました: {body.get('lineUserId')}")
 
