@@ -99,6 +99,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
   # 環境変数
   environment {
     variables = {
+      API_TOKEN_PARAM_NAME           = aws_ssm_parameter.traffic_api_token.name
       S3_OUTPUT_BUCKET               = aws_s3_bucket.s3_train_alert.id
       TRAIN_STATUS_TABLE_NAME        = aws_dynamodb_table.train_status.name
       TRAFFIC_API_TOKEN_NAME         = aws_ssm_parameter.traffic_api_token.name
