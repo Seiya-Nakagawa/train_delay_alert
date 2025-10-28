@@ -14,14 +14,18 @@ from boto3.dynamodb.conditions import Key  # query操作のためにKeyをイン
 from botocore.exceptions import ClientError
 
 # --- 設定項目 ---
-API_TOKEN_PARAM_NAME = os.environ.get("API_TOKEN_PARAM_NAME")
+ODPT_TOKEN_PARAM_NAME = os.environ.get("ODPT_TOKEN_PARAM_NAME")
 S3_BUCKET_NAME = os.environ.get("S3_OUTPUT_BUCKET")
 FLAG_FILE_KEY = "user-list.json"  # フラグファイルのS3キー
 CACHE_FILE_KEY = "route-list.json"  # 路線リストキャッシュのS3キー
 USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME")
 API_FILE_NAME = "api_url.json"
 SAVE_PATH = "/tmp"
-API_URL = "https://api-challenge.odpt.org/api/v4/odpt:TrainInformation"
+API_URL = [
+    "https://api.odpt.org/api/v4/odpt:TrainInformation",
+    "https://api-challenge.odpt.org/api/v4/odpt:TrainInformation",
+]
+
 
 # DynamoDBテーブルのキー設定
 # パーティションキー (主キー)
@@ -36,9 +40,8 @@ s3_client = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
 user_table = dynamodb.Table(USER_TABLE_NAME)
 
+
 # --- ヘルパー関数 ---
-
-
 def get_ssm_parameter(ssm_param_name):
     try:
         response = ssm_client.get_parameter(Name=ssm_param_name, WithDecryption=True)
@@ -48,7 +51,7 @@ def get_ssm_parameter(ssm_param_name):
         raise
 
 
-API_TOKEN = get_ssm_parameter(API_TOKEN_PARAM_NAME)
+# API_TOKEN = get_ssm_parameter(ODPT_TOKEN_PARAM_NAME)
 
 
 def get_s3_object(bucket_name, key):
@@ -161,13 +164,25 @@ def get_line_list(lineuserid_list):
 
 def get_realtime_train_information():
     """リアルタイム運行情報APIを呼び出し、全路線の現在の運行状況を取得する。"""
-    params = {"acl:consumerKey": API_TOKEN}
-    print(f"総合案内所（{API_URL}）に全路線の情報を問い合わせます...")
     try:
-        response = requests.get(API_URL, params=params)
-        print(response)
-        response.raise_for_status()
-        return response.json()
+        realtime_data = []
+        API_TOKEN = "gut723ueywfj6rkwvfi86skmz3yg5a4tt6sf974k1xinkkg1cormvfunb9xpgskw"
+
+        # 2. リクエストパラメータの設定
+        # odpt:operator に相模鉄道を指定します
+        for api_url in API_URL:
+            print(f"APIエンドポイント: {api_url}")
+            # check_url = api_url + API_TOKEN
+            params = {"acl:consumerKey": API_TOKEN}
+
+            response = requests.get(api_url, params=params)
+            print("response")
+            print(response.json())
+            response.raise_for_status()
+            realtime_data.extend(response.json())
+
+        print("\n--- 取得した運行情報 ---")
+        print(realtime_data)
     except requests.exceptions.RequestException as e:
         print(f"エラー: APIへのリクエストに失敗しました。\n{e}")
         return None
@@ -193,9 +208,6 @@ def lambda_handler(event, context):
             s3_client.put_object(
                 Bucket=S3_BUCKET_NAME, Key=CACHE_FILE_KEY, Body=route_string
             )
-
-        else:
-            print("フラグファイルが見つかりませんでした。")
 
         # with open(API_FILE_NAME, "r", encoding="utf-8") as f:
         #     api_data = json.load(f)
