@@ -14,7 +14,8 @@ from boto3.dynamodb.conditions import Key  # query操作のためにKeyをイン
 from botocore.exceptions import ClientError
 
 # --- 設定項目 ---
-ODPT_TOKEN_PARAM_NAME = os.environ.get("ODPT_TOKEN_PARAM_NAME")
+ODPT_ACCESS_TOKEN_PARAM_NAME = os.environ.get("ODPT_ACCESS_TOKEN_PARAM_NAME")
+CHALLENGE_ACCESS_TOKEN_PARAM_NAME = os.environ.get("CHALLENGE_ACCESS_TOKEN_PARAM_NAME")
 S3_BUCKET_NAME = os.environ.get("S3_OUTPUT_BUCKET")
 FLAG_FILE_KEY = "user-list.json"  # フラグファイルのS3キー
 CACHE_FILE_KEY = "route-list.json"  # 路線リストキャッシュのS3キー
@@ -51,7 +52,22 @@ def get_ssm_parameter(ssm_param_name):
         raise
 
 
-# API_TOKEN = get_ssm_parameter(ODPT_TOKEN_PARAM_NAME)
+api_url_token_pairs = []
+
+for api_url in API_URL:
+    if api_url == "https://api.odpt.org/api/v4/odpt:TrainInformation":
+        PARAM_NAME = ODPT_ACCESS_TOKEN_PARAM_NAME
+    elif api_url == "https://api-challenge.odpt.org/api/v4/odpt:TrainInformation":
+        PARAM_NAME = CHALLENGE_ACCESS_TOKEN_PARAM_NAME
+    else:
+        print("パラメータストアからのデータ取得でエラーが発生しました")
+        raise
+
+    API_TOKEN = get_ssm_parameter(PARAM_NAME)
+    api_url_token_pairs.append([api_url, API_TOKEN])
+
+print("--- APIエンドポイントとトークン ---")
+print(api_url_token_pairs)
 
 
 def get_s3_object(bucket_name, key):
@@ -141,25 +157,6 @@ def get_line_list(lineuserid_list):
     print(f"対象ユーザの全路線情報（重複は排除）: {user_route_list}")
 
     return user_route_list
-
-
-# def check_delay_route(api_url):
-#     check_url = api_url + API_TOKEN
-#     print("ファイルのダウンロードを開始します...")
-#     # 2. GETリクエストを送信。stream=Trueで大きなファイルもメモリ効率よく扱う
-#     print("ファイルのダウンロードを開始します...")
-#     with requests.get(check_url, stream=True) as response:
-#         # 3. エラーレスポンス（4xxや5xx）が返ってきた場合に例外を発生させる
-#         response.raise_for_status()
-
-#         # 4. ファイルをバイナリ書き込みモード('wb')で開く
-#         with open(SAVE_PATH, "wb") as f:
-#             # 5. レスポンスのデータを少しずつ（チャンクごと）ファイルに書き込む
-#             for chunk in response.iter_content(chunk_size=8192):
-#                 f.write(chunk)
-
-#         print(f"{api_url}からファイルのダウンロードが完了しました。 -> {SAVE_PATH}")
-#         return True
 
 
 def get_realtime_train_information():

@@ -99,12 +99,12 @@ resource "aws_lambda_function" "check_delay_lambda" {
   # 環境変数
   environment {
     variables = {
-      API_TOKEN_PARAM_NAME           = aws_ssm_parameter.traffic_api_token.name
-      S3_OUTPUT_BUCKET               = aws_s3_bucket.s3_train_alert.id
-      TRAIN_STATUS_TABLE_NAME        = aws_dynamodb_table.train_status.name
-      TRAFFIC_API_TOKEN_NAME         = aws_ssm_parameter.traffic_api_token.name
-      LINE_CHANNEL_ACCESS_TOKEN_NAME = aws_ssm_parameter.line_channel_access_token.name
-      USER_TABLE_NAME                = aws_dynamodb_table.users.name
+      ODPT_ACCESS_TOKEN_PARAM_NAME      = aws_ssm_parameter.odpt_access_token.name
+      CHALLENGE_ACCESS_TOKEN_PARAM_NAME = aws_ssm_parameter.challenge_access_token.name
+      S3_OUTPUT_BUCKET                  = aws_s3_bucket.s3_train_alert.id
+      TRAIN_STATUS_TABLE_NAME           = aws_dynamodb_table.train_status.name
+      LINE_CHANNEL_ACCESS_TOKEN_NAME    = aws_ssm_parameter.line_channel_access_token.name
+      USER_TABLE_NAME                   = aws_dynamodb_table.users.name
     }
   }
 
