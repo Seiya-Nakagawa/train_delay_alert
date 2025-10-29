@@ -105,6 +105,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
       TRAIN_STATUS_TABLE_NAME           = aws_dynamodb_table.train_status.name
       LINE_CHANNEL_ACCESS_TOKEN_NAME    = aws_ssm_parameter.line_channel_access_token.name
       USER_TABLE_NAME                   = aws_dynamodb_table.users.name
+      NG_WORD                           = var.ng_word[0]
     }
   }
 

@@ -14,14 +14,18 @@ from boto3.dynamodb.conditions import Key  # query操作のためにKeyをイン
 from botocore.exceptions import ClientError
 
 # --- 設定項目 ---
+LINE_CHANNEL_ID = os.environ.get("LINE_CHANNEL_ID")
+LINE_CHANNEL_SECRET_PARAM_NAME = os.environ.get("LINE_CHANNEL_SECRET_PARAM_NAME")
 ODPT_ACCESS_TOKEN_PARAM_NAME = os.environ.get("ODPT_ACCESS_TOKEN_PARAM_NAME")
 CHALLENGE_ACCESS_TOKEN_PARAM_NAME = os.environ.get("CHALLENGE_ACCESS_TOKEN_PARAM_NAME")
 S3_BUCKET_NAME = os.environ.get("S3_OUTPUT_BUCKET")
 FLAG_FILE_KEY = "user-list.json"  # フラグファイルのS3キー
-CACHE_FILE_KEY = "route-list.json"  # 路線リストキャッシュのS3キー
+CACHE_FILE_KEY = "route-list.json"  # 登録されている路線リストキャッシュのS3キー
+DELAY_FILE_KEY = "delay-list.json"  # 遅延中の路線リストキャッシュのS3キー
 USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME")
 API_FILE_NAME = "api_url.json"
 SAVE_PATH = "/tmp"
+NG_WORD = os.environ.get("NG_WORD")
 API_URL = [
     "https://api.odpt.org/api/v4/odpt:TrainInformation",
     "https://api-challenge.odpt.org/api/v4/odpt:TrainInformation",
@@ -52,6 +56,7 @@ def get_ssm_parameter(ssm_param_name):
         raise
 
 
+LINE_CHANNEL_SECRET = get_ssm_parameter(LINE_CHANNEL_SECRET_PARAM_NAME)
 api_url_token_pairs = []
 
 for api_url in API_URL:
@@ -65,9 +70,6 @@ for api_url in API_URL:
 
     API_TOKEN = get_ssm_parameter(PARAM_NAME)
     api_url_token_pairs.append([api_url, API_TOKEN])
-
-print("--- APIエンドポイントとトークン ---")
-print(api_url_token_pairs)
 
 
 def get_s3_object(bucket_name, key):
@@ -162,27 +164,174 @@ def get_line_list(lineuserid_list):
 def get_realtime_train_information():
     """リアルタイム運行情報APIを呼び出し、全路線の現在の運行状況を取得する。"""
     try:
-        realtime_data = []
-        API_TOKEN = "gut723ueywfj6rkwvfi86skmz3yg5a4tt6sf974k1xinkkg1cormvfunb9xpgskw"
+        realtime_data_list = []
 
         # 2. リクエストパラメータの設定
         # odpt:operator に相模鉄道を指定します
-        for api_url in API_URL:
-            print(f"APIエンドポイント: {api_url}")
+        for url, token in api_url_token_pairs:
+            print(f"APIエンドポイント: {url}")
             # check_url = api_url + API_TOKEN
-            params = {"acl:consumerKey": API_TOKEN}
+            params = {"acl:consumerKey": token}
 
-            response = requests.get(api_url, params=params)
+            response = requests.get(url, params=params)
             print("response")
             print(response.json())
             response.raise_for_status()
-            realtime_data.extend(response.json())
+            realtime_data_list.extend(response.json())
 
-        print("\n--- 取得した運行情報 ---")
-        print(realtime_data)
+        return realtime_data_list
+
     except requests.exceptions.RequestException as e:
         print(f"エラー: APIへのリクエストに失敗しました。\n{e}")
         return None
+
+
+def send_line_message(user_id, message_object):
+    """
+    指定されたユーザーIDにLINEメッセージを送信する。
+
+    Args:
+        user_id (str): 送信先のLINEユーザーID ('U'から始まる文字列)
+        message_object (dict): 送信するメッセージオブジェクト (テキストまたはFlex Message)
+
+    Returns:
+        bool: 送信が成功した場合はTrue、失敗した場合はFalse
+    """
+    print(f"ユーザー '{user_id}' にメッセージを送信します...")
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
+    }
+
+    payload = {"to": user_id, "messages": [message_object]}
+
+    try:
+        response = requests.post(
+            LINE_PUSH_API_URL, headers=headers, data=json.dumps(payload)
+        )
+        # ステータスコードが200番台でない場合に例外を発生させる
+        response.raise_for_status()
+
+        print(f"メッセージの送信に成功しました。 Status Code: {response.status_code}")
+        return True
+
+    except requests.exceptions.RequestException as e:
+        print("エラー: LINEへのメッセージ送信に失敗しました。")
+        # APIからのエラーレスポンス詳細を表示
+        if e.response is not None:
+            print(f"Status Code: {e.response.status_code}")
+            print(f"Response Body: {e.response.text}")
+        else:
+            print(f"Error Details: {e}")
+        return False
+
+
+def create_snd_message(user_route, message):
+    """
+    遅延情報を示すFlex MessageのJSONオブジェクトを作成する。
+
+    Args:
+        route_name (str): 路線名 (例: "JR山手線")
+        information_text (str): 運行情報の詳細テキスト
+
+    Returns:
+        dict: LINE Flex MessageのJSONオブジェクト
+    """
+    # LINE Flex Message Simulator (https://developers.line.biz/flex-simulator/)
+    # を使うと、このようなJSONを簡単にデザイン・作成できます。
+    snd_message = {
+        "type": "flex",
+        "altText": f"{user_route}の運行情報",  # 通知に表示されるテキスト
+        "contents": {
+            "type": "bubble",
+            "header": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "⚠️ 列車遅延情報",
+                        "color": "#ffffff",
+                        "weight": "bold",
+                        "size": "md",
+                    }
+                ],
+                "backgroundColor": "#FF6B6B",
+            },
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": user_route,
+                        "weight": "bold",
+                        "size": "xl",
+                        "margin": "md",
+                    },
+                    {"type": "separator", "margin": "lg"},
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "margin": "lg",
+                        "spacing": "sm",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": message,
+                                "wrap": True,
+                                "color": "#555555",
+                                "size": "sm",
+                            }
+                        ],
+                    },
+                ],
+            },
+        },
+    }
+    return snd_message
+
+
+def snd_line_message(user_id, message_object):
+    """
+    指定されたユーザーIDにLINEメッセージを送信する。
+
+    Args:
+        user_id (str): 送信先のLINEユーザーID ('U'から始まる文字列)
+        message_object (dict): 送信するメッセージオブジェクト (テキストまたはFlex Message)
+
+    Returns:
+        bool: 送信が成功した場合はTrue、失敗した場合はFalse
+    """
+    print(f"ユーザー '{user_id}' にメッセージを送信します...")
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {LINE_CHANNEL_SECRET}",
+    }
+
+    payload = {"to": user_id, "messages": [message_object]}
+
+    try:
+        response = requests.post(
+            LINE_PUSH_API_URL, headers=headers, data=json.dumps(payload)
+        )
+        # ステータスコードが200番台でない場合に例外を発生させる
+        response.raise_for_status()
+
+        print(f"メッセージの送信に成功しました。 Status Code: {response.status_code}")
+        return True
+
+    except requests.exceptions.RequestException as e:
+        print("エラー: LINEへのメッセージ送信に失敗しました。")
+        # APIからのエラーレスポンス詳細を表示
+        if e.response is not None:
+            print(f"Status Code: {e.response.status_code}")
+            print(f"Response Body: {e.response.text}")
+        else:
+            print(f"Error Details: {e}")
+        return False
 
 
 def lambda_handler(event, context):
@@ -206,20 +355,82 @@ def lambda_handler(event, context):
                 Bucket=S3_BUCKET_NAME, Key=CACHE_FILE_KEY, Body=route_string
             )
 
-        # with open(API_FILE_NAME, "r", encoding="utf-8") as f:
-        #     api_data = json.load(f)
+        realtime_data_list = get_realtime_train_information()
 
-        get_realtime_train_information()
+        with open("route_railway_list.json", "r", encoding="utf-8") as f:
+            route_railway_string = f.read()
 
-        # found_url = None
+        route_railway_list = json.loads(route_railway_string)
 
-        # for route in route_list:
-        #     for api_item in api_data:
-        #         if api_item.get("route") == route:
-        #             api_url = api_item.get("url")
-        #             check_delay_route(api_url)
-        #             route = api_data.get("route")
-        #         break
+        with open("delay_messages.json", "r", encoding="utf-8") as f:
+            delay_messages_string = f.read()
+
+        delay_messages_list = json.loads(delay_messages_string)
+
+        notification_list = []
+
+        # 対象の路線を1件ごと処理
+        for user_route in user_route_list:
+            send_flg = True
+            railway_name = None
+            message = None
+            # route_railway_list.jsonで一致する路線名の"odpt:railway"を取得
+            for route_railway in route_railway_list:
+                if route_railway["route"] == user_route:
+                    railway_name = route_railway["odpt:railway"]
+                    break
+
+            # route_railway_list.jsonに路線がない場合はエラー
+            if railway_name is None:
+                return {
+                    "statusCode": 401,
+                    "body": json.dumps("ERROR: "),
+                }
+
+            # API取得したリアルタイム路線情報を１件ずつ抽出
+            for realtime_data in realtime_data_list:
+                if realtime_data["odpt:railway"] == railway_name:
+                    message = realtime_data["odpt:trainInformationText"]["ja"]
+                    break
+
+            if message is None:
+                return {
+                    "statusCode": 402,
+                    "body": json.dumps("ERROR: "),
+                }
+
+            for delay_message in delay_messages_list:
+                if delay_message["message"] == message:
+                    send_flg = False
+                    break
+
+            if send_flg is True:
+                for ng_word in NG_WORD:
+                    if ng_word in message:
+                        # query操作を実行: 指定したパーティションキーに紐づく項目を全て取得
+                        response_snd_user = user_table.query(
+                            KeyConditionExpression=Key(ROUTE_COLUMN_NAME).eq(user_route)
+                        )
+
+                # query操作を実行: 指定したパーティションキーに紐づく項目を全て取得
+                response_snd_user = user_table.query(
+                    eyConditionExpression=Key(ROUTE_COLUMN_NAME).eq(user_route)
+                )
+
+                print("response_snd_user")
+                print(response_snd_user)
+
+                # route_list = [
+                # item[ROUTE_COLUMN_NAME]
+                # for item in response.get("Items", [])
+                # if not item.get(ROUTE_COLUMN_NAME, "").startswith("#PROFILE#")
+
+                # 送信するFlex Messageを生成
+                # snd_message = create_snd_message(user_route, message)
+
+                # LINEにメッセージを送信
+                # snd_line_message(snd_message)
+                break
 
         return {
             "statusCode": 200,

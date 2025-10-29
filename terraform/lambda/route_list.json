@@ -1,6 +1,0 @@
-[
-  {
-    "route": "相鉄本線",
-    "odpt:railway": "https://api-challenge.odpt.org/api/v4/files/Sotetsu/data/Sotetsu-Train-GTFS.zip?acl:consumerKey="
-  }
-]
