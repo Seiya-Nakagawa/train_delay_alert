@@ -100,7 +100,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
   environment {
     variables = {
       LINE_CHANNEL_ID                   = var.line_channel_id
-      LINE_CHANNEL_SECRET_PARAM_NAME    = aws_ssm_parameter.line_channel_secret.name
+      LINE_ACCESS_TOKEN_PARAM_NAME      = aws_ssm_parameter.line_channel_access_token.name
       ODPT_ACCESS_TOKEN_PARAM_NAME      = aws_ssm_parameter.odpt_access_token.name
       CHALLENGE_ACCESS_TOKEN_PARAM_NAME = aws_ssm_parameter.challenge_access_token.name
       S3_OUTPUT_BUCKET                  = aws_s3_bucket.s3_train_alert.id

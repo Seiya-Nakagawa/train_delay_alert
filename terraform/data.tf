@@ -32,11 +32,6 @@ data "archive_file" "check_delay_handler_function_zip" {
   }
 
   source {
-    content  = file("${path.module}/lambda/delay_messages.json")
-    filename = "delay_messages.json"
-  }
-
-  source {
     content  = file("${path.module}/lambda/route_railway_list.json")
     filename = "route_railway_list.json"
   }
