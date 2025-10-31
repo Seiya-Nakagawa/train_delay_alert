@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const endTimeInput = document.getElementById('endTime');
   const allDayCheckbox = document.getElementById('allDayCheckbox');
   const timeInputs = document.getElementById('timeInputs');
-  const dayOfWeekContainer = document.getElementById('dayOfWeekContainer');
+
 
   // アプリケーション全体で利用する定数と変数
   const MAX_ROUTES = 5; // 登録可能な最大路線数
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } else {
       // ユーザー情報が取得できなかった場合
-      console.error('取得したユーザーデータが不正です:', userData);
+      console.error({ message: '取得したユーザーデータが不正です', function: 'main', userData });
       displayMessage('エラー: ユーザー情報の取得に失敗しました。時間をおいて再度お試しください。', true);
     }
 
@@ -93,11 +93,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const data = await response.json();
-      console.log('Lambdaからの応答:', data);
+      console.log({ message: 'Lambdaからの応答', function: 'getUserDataFromLambda', data });
       return data;
 
     } catch (error) {
-      console.error('Lambdaへのリクエストに失敗しました:', error);
+      console.error({ message: 'Lambdaへのリクエストに失敗しました', function: 'getUserDataFromLambda', error });
       return null;
     }
   }
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!response.ok) throw new Error('路線リストの取得に失敗');
       allRoutes = await response.json();
     } catch (error) {
-      console.error('routes.jsonの読み込みエラー:', error);
+      console.error({ message: 'routes.jsonの読み込みエラー', function: 'loadAllRoutes', error });
       // 路線リストがなくてもアプリの他の機能は動作を続ける
     }
   }
@@ -129,25 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       notificationStartTime = '07:00',
       notificationEndTime = '09:00',
       isAllDay = false,
-      notificationDays = ['mon', 'tue', 'wed', 'thu', 'fri'] // デフォルトは平日
     } = userData;
-
-    // 時間帯設定を反映
-    startTimeInput.value = notificationStartTime;
-    endTimeInput.value = notificationEndTime;
-    allDayCheckbox.checked = isAllDay;
-    timeInputs.style.display = isAllDay ? 'none' : '';
-
-    // 曜日設定を反映
-    const dayCheckboxes = dayOfWeekContainer.querySelectorAll('input[type="checkbox"]');
-    dayCheckboxes.forEach(checkbox => {
-      checkbox.checked = notificationDays.includes(checkbox.value);
-    });
-
-    // 「毎日」チェックボックスの状態を更新
-    const dayEveryCheckbox = document.getElementById('dayEvery');
-    const individualDayCheckboxes = Array.from(dayOfWeekContainer.querySelectorAll('.dow-checkboxes input[type="checkbox"]:not(#dayEvery)'));
-    dayEveryCheckbox.checked = individualDayCheckboxes.length > 0 && individualDayCheckboxes.every(cb => cb.checked);
 
     // 路線リストをクリアしてから、登録済みの路線をフォームに追加
     routeListContainer.innerHTML = '';
@@ -296,64 +278,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       timeInputs.style.display = allDayCheckbox.checked ? 'none' : '';
     });
 
-    // 「毎日」チェックボックスの変更イベント
-    const dayEveryCheckbox = document.getElementById('dayEvery');
-    const individualDayCheckboxes = Array.from(dayOfWeekContainer.querySelectorAll('.dow-checkboxes input[type="checkbox"]:not(#dayEvery)'));
-
-    dayEveryCheckbox.addEventListener('change', () => {
-      individualDayCheckboxes.forEach(checkbox => {
-        checkbox.checked = dayEveryCheckbox.checked;
-      });
-    });
-
-    // 各曜日のチェックボックスの変更イベント
-    individualDayCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', () => {
-        dayEveryCheckbox.checked = individualDayCheckboxes.every(cb => cb.checked);
-      });
-    });
-
-    // 保存ボタンのクリックイベント
-    saveButton.addEventListener('click', async () => {
-      // --- 入力値のバリデーション ---
-      const routeInputs = document.querySelectorAll('.route-input');
-      const routesToValidate = Array.from(routeInputs)
-        .map(input => {
-          const lineName = input.value.trim();
-          if (lineName === '') return null; // 空の入力は無視
-
-          // 路線名がリストに存在するかどうかで検証
-          const isExactMatchInAllRoutes = allRoutes.some(route => route.line_name === lineName);
-
-          if (!isExactMatchInAllRoutes) {
-            return lineName; // 無効な路線名を収集
-          }
-          return null;
-        })
-        .filter(name => name !== null);
-
-      if (routesToValidate.length > 0) {
-        alert(`以下の路線は登録できません。候補から選択してください。
-        ${routesToValidate.join('')}`);
-        return; // バリデーションエラーがあれば保存を中断
-      }
-
-      // --- 保存データの準備 ---
-      const routesToSave = Array.from(routeInputs)
-        .map(input => input.value.trim())
-        .filter(lineName => lineName !== '');
-
-      const selectedDays = Array.from(dayOfWeekContainer.querySelectorAll('.dow-checkboxes input:checked'))
-        .map(checkbox => checkbox.value);
-
-      // バックエンドに送信するデータ（ペイロード）
       const payload = {
         lineUserId: lineUserId,
         routes: routesToSave,
         notificationStartTime: startTimeInput.value,
         notificationEndTime: endTimeInput.value,
         isAllDay: allDayCheckbox.checked,
-        notificationDays: selectedDays
       };
 
       displayMessage('保存中...', false);
@@ -372,7 +302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         displayMessage('保存しました！', false);
 
       } catch (error) {
-        console.error('保存リクエスト失敗:', error);
+        console.error({ message: '保存リクエスト失敗', function: 'setupEventListeners.saveButton', error });
         displayMessage('エラー: 保存に失敗しました。', true);
       } finally {
         // 1.5秒後にメッセージを消してフォームを再表示
