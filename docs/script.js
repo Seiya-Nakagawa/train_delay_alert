@@ -278,6 +278,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       timeInputs.style.display = allDayCheckbox.checked ? 'none' : '';
     });
 
+    // 保存ボタンのクリックイベント
+    saveButton.addEventListener('click', async () => {
+      // 保存する路線データを収集
+      const routesToSave = Array.from(document.querySelectorAll('.route-input'))
+        .map(input => input.value.trim())
+        .filter(routeName => routeName !== '');
+
+      // 候補にない路線名が入力されていないか簡易的にチェック
+      const allRouteNames = new Set(allRoutes.map(r => r.line_name));
+      const invalidRoute = routesToSave.find(r => !allRouteNames.has(r));
+      if (invalidRoute) {
+          alert(`「${invalidRoute}」は有効な路線名ではありません。候補から選択するか、正しい路線名を入力してください。`);
+          return;
+      }
+
       const payload = {
         lineUserId: lineUserId,
         routes: routesToSave,

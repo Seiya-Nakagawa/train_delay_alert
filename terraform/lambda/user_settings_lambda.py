@@ -8,7 +8,7 @@ import requests
 from botocore.exceptions import ClientError
 
 # --- ログ設定 ---
-LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG").upper()
 logger = logging.getLogger()
 logger.setLevel(LOG_LEVEL)
 
