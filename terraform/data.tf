@@ -12,8 +12,15 @@ data "archive_file" "user_settings_lambda_function_zip" {
   type = "zip"
 
   # ZIPに含めるソースファイルを指定
-  source_file = "${path.module}/lambda/user_settings_lambda.py"
+  source {
+    content  = file("${path.module}/lambda/user_settings_lambda.py")
+    filename = "user_settings_lambda.py"
+  }
 
+  source {
+    content  = file("${path.module}/lambda/railway_list.json")
+    filename = "railway_list.json"
+  }
   # 出力されるZIPファイルのパス
   output_path = "${path.module}/build/user_settings_lambda_function.zip"
 }

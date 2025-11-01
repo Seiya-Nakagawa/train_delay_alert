@@ -309,6 +309,50 @@ def post_user_data(user_data):
         raise
 
 
+def s3_update_user_list(line_user_id):
+    """S3のuser-list.jsonにユーザーIDを追記します。
+
+    Args:
+        line_user_id (str): 追加するLINEユーザーID。
+    """
+    try:
+        # 既存のリストを取得、なければ新規作成
+        user_list = get_s3_object(S3_BUCKET_NAME, USER_LIST_FILE_KEY) or []
+
+        # ユーザーIDがリストになければ追加
+        if line_user_id not in user_list:
+            user_list.append(line_user_id)
+            logger.info(
+                f"ユーザーID'{line_user_id}'をS3ファイルに追加します。",
+                extra={"line_user_id": line_user_id},
+            )
+
+            # 更新したリストをS3に書き戻す
+            user_list_string = json.dumps(user_list, indent=2, ensure_ascii=False)
+            s3_client.put_object(
+                Bucket=S3_BUCKET_NAME,
+                Key=USER_LIST_FILE_KEY,
+                Body=user_list_string,
+            )
+            logger.info(
+                f"S3ファイル'{USER_LIST_FILE_KEY}'を更新しました。",
+                extra={"file_key": USER_LIST_FILE_KEY},
+            )
+        else:
+            logger.info(
+                f"ユーザーID'{line_user_id}'は既にリストに存在するため、S3ファイルの更新はスキップします。",
+                extra={"line_user_id": line_user_id},
+            )
+
+    except Exception as e:
+        logger.error(
+            f"S3へのユーザーリスト書き込みでエラーが発生しました: {e}",
+            exc_info=True,
+        )
+        # この関数は他の処理から呼び出されることを想定し、
+        # エラーが発生してもメインの処理は続行できるように例外は再送出しない。
+
+
 # --- メインハンドラ (変更なし) ---
 def lambda_handler(event, context):
     try:
@@ -344,6 +388,9 @@ def lambda_handler(event, context):
                 f"ユーザー情報を更新しました: {body.get('lineUserId')}",
                 extra={"line_user_id": body.get("lineUserId")},
             )
+
+            s3_update_user_list(line_user_id)
+
             return {
                 "statusCode": 200,
                 "body": json.dumps(body, ensure_ascii=False, default=str),
