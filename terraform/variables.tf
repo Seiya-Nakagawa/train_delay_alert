@@ -80,7 +80,12 @@ variable "frontend_origin" {
   type        = string
 }
 
-variable "line_channel_id" {
-  description = "LINEチャネルID"
+variable "line_login_channel_id" {
+  description = "LINEログインチャネルID"
+  type        = string
+}
+
+variable "line_post_channel_id" {
+  description = "LINE投稿チャネルID"
   type        = string
 }

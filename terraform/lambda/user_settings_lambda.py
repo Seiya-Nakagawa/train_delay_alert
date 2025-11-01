@@ -51,14 +51,8 @@ def get_line_user_id(body):
     if not auth_code:
         raise ValueError("認可コードが必要です。")
 
-    # デバッグ用に変数の値をログに出力
-    logger.debug("LINE APIリクエストのパラメータ:")
-    logger.debug(f"  redirect_uri: {FRONTEND_REDIRECT_URL}")
-    logger.debug(f"  client_id: {LINE_CHANNEL_ID}")
-    logger.debug(
-        f"  client_secret: {'********' if LINE_CHANNEL_SECRET else None}"
-    )  # シークレットはマスク
-
+    print("test")
+    print(auth_code)
     response = requests.post(
         LINE_TOKEN_URL,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -70,6 +64,9 @@ def get_line_user_id(body):
             "client_secret": LINE_CHANNEL_SECRET,
         },
     )
+    print("test2")
+    print(response)
+
     response.raise_for_status()
     response_json = response.json()
     id_token = response_json.get("id_token")

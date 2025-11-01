@@ -49,7 +49,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
   # 環境変数
   environment {
     variables = {
-      LINE_CHANNEL_ID = var.line_channel_id
+      LINE_CHANNEL_ID = var.line_login_channel_id
       # LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = aws_ssm_parameter.line_channel_access_token.name
       LINE_CHANNEL_SECRET_PARAM_NAME = aws_ssm_parameter.line_channel_secret.name
       USER_TABLE_NAME                = aws_dynamodb_table.users.name
@@ -99,7 +99,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
   # 環境変数
   environment {
     variables = {
-      LINE_CHANNEL_ID                   = var.line_channel_id
+      LINE_CHANNEL_ID                   = var.line_post_channel_id
       LINE_ACCESS_TOKEN_PARAM_NAME      = aws_ssm_parameter.line_channel_access_token.name
       ODPT_ACCESS_TOKEN_PARAM_NAME      = aws_ssm_parameter.odpt_access_token.name
       CHALLENGE_ACCESS_TOKEN_PARAM_NAME = aws_ssm_parameter.challenge_access_token.name
