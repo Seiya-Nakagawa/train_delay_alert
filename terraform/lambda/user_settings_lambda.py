@@ -19,6 +19,7 @@ USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME")
 FRONTEND_REDIRECT_URL = os.environ.get("FRONTEND_REDIRECT_URL")
 S3_BUCKET_NAME = os.environ.get("S3_OUTPUT_BUCKET")
 USER_LIST_FILE_KEY = "user-list.json"
+SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN")
 
 LINE_TOKEN_URL = "https://api.line.me/oauth2/v2.1/token"
 LINE_VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify"
@@ -26,6 +27,7 @@ PROFILE_KEY = "#PROFILE#"
 
 ssm_client = boto3.client("ssm")
 s3_client = boto3.client("s3")
+sns_client = boto3.client("sns")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(USER_TABLE_NAME)
 
@@ -391,6 +393,19 @@ def lambda_handler(event, context):
             )
 
             s3_update_user_list(line_user_id)
+
+            # --- SNS通知 ---
+            if SNS_TOPIC_ARN:
+                try:
+                    message = f"新しいユーザーが登録/更新されました。\nLINE User ID: {line_user_id}"
+                    subject = "【Train Delay Alert】ユーザー登録通知"
+                    sns_client.publish(
+                        TopicArn=SNS_TOPIC_ARN, Message=message, Subject=subject
+                    )
+                    logger.info("SNSにユーザー登録通知を送信しました。")
+                except ClientError as e:
+                    logger.error(f"SNSへの通知送信に失敗しました: {e}", exc_info=True)
+            # --- ここまで ---
 
             return {
                 "statusCode": 200,

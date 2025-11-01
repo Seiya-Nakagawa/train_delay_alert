@@ -49,13 +49,13 @@ resource "aws_lambda_function" "user_settings_lambda" {
   # 環境変数
   environment {
     variables = {
-      LINE_CHANNEL_ID = var.line_login_channel_id
-      # LINE_CHANNEL_ACCESS_TOKEN_PARAM_NAME = aws_ssm_parameter.line_channel_access_token.name
+      LINE_CHANNEL_ID                = var.line_login_channel_id
       LINE_CHANNEL_SECRET_PARAM_NAME = aws_ssm_parameter.line_channel_secret.name
       USER_TABLE_NAME                = aws_dynamodb_table.users.name
       FRONTEND_REDIRECT_URL          = var.frontend_redirect_url
       FRONTEND_ORIGIN                = var.frontend_origin
       S3_OUTPUT_BUCKET               = aws_s3_bucket.s3_train_alert.id
+      SNS_TOPIC_ARN                  = aws_sns_topic.sns_topic_system.arn
     }
   }
 

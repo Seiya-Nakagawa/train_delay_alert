@@ -347,76 +347,74 @@ def snd_line_message(user_id, message_object):
 def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list):
     # アクティブユーザーが設定した各路線について遅延をチェック
     new_delay_messages_list = []
+    id_to_name_map = {item["odpt:railway"]: item["route"] for item in railway_list}
+    ng_words = [word.strip() for word in NG_WORD.split(',')] if NG_WORD else []
 
     logger.info(f"アクティブユーザーの {len(user_route_list)} 件の路線の処理を開始します。")
-    for user_route in user_route_list:
-        logger.debug(f"--- 路線'{user_route}'の処理を開始 ---", extra={"user_route": user_route})
-        send_flg = False
-        railway_name = None
-        message = None
-        # ユーザー設定の路線名 (例: "JR山手線") をAPIで使われる鉄道名 (例: "odpt.Railway:JR-East.Yamanote") に変換
-        for route_railway in railway_list:
-            if route_railway["route"] == user_route:
-                railway_name = route_railway["odpt:railway"]
-                break
-        if not railway_name:
+    for user_route_id in user_route_list:
+        user_route_name = id_to_name_map.get(user_route_id)
+        if not user_route_name:
             logger.warning(
-                f"'{user_route}'に一致する鉄道名が見つかりませんでした。スキップします。",
-                extra={"user_route": user_route}
+                f"''{user_route_id}''に一致する鉄道名が見つかりませんでした。スキップします。",
+                extra={"user_route_id": user_route_id},
             )
             continue
-        logger.debug(f"鉄道名'{railway_name}'にマッピングされました。", extra={"user_route": user_route, "railway_name": railway_name})
+
+        logger.debug(f"--- 路線'{user_route_name}'の処理を開始 ---", extra={"user_route": user_route_name})
+        send_flg = False
+        message = None
 
         # 鉄道名に一致するリアルタイム運行情報を検索
         for realtime_data in realtime_data_list:
-            if realtime_data["odpt:railway"] == railway_name:
+            if realtime_data["odpt:railway"] == user_route_id:
                 message = realtime_data["odpt:trainInformationText"]["ja"]
                 break
         if not message:
             logger.warning(
-                f"鉄道名'{railway_name}'のリアルタイム情報が見つかりませんでした。スキップします。",
-                extra={"railway_name": railway_name}
+                f"鉄道名'{user_route_id}'のリアルタイム情報が見つかりませんでした。スキップします。",
+                extra={"railway_name": user_route_id}
             )
             continue
-        logger.debug(f"運行情報メッセージが見つかりました: '{message}'", extra={"railway_name": railway_name, "message": message})
+        logger.debug(f"運行情報メッセージが見つかりました: '{message}'", extra={"railway_name": user_route_id, "message": message})
 
         # 取得した運行情報が、既に通知済のメッセージかチェック
+        is_new_message = True
         for delay_message in s3_delay_list:
-            logger.debug(f"比較: '{message}' vs '{delay_message['messages']}'")
-            if delay_message["messages"] == message:
-                send_flg = False
+            if delay_message.get("messages") == message:
+                is_new_message = False
                 logger.info(
-                    "このメッセージは既知の通常運行メッセージです。通知は送信されません。",
+                    "このメッセージは既に通知済みです。スキップします。",
                     extra={"message": message}
                 )
                 break
-            else:
-                send_flg = True
-                continue
-
-        if send_flg:
+        
+        if is_new_message:
             # 遅延のメッセージ内容かチェック
-            for ng_word in NG_WORD:
-                if message in ng_word:
-                    send_flg = True
-                    break
-                else:
-                    send_flg = False
-                    continue
+            is_delay = False
+            if ng_words:
+                for ng_word in ng_words:
+                    if ng_word in message:
+                        is_delay = True
+                        break
+            else: # NG_WORDが設定されてなければ、新しいメッセージはすべて遅延とみなす
+                is_delay = True
+
+            if is_delay:
+                send_flg = True
 
         # 通知フラグがTrueの場合、通知処理を実行
         if send_flg:
             logger.info(
                 "新規の遅延またはステータス変更を検知しました。通知の準備をします。",
-                extra={"user_route": user_route, "message": message}
+                extra={"user_route": user_route_name, "message": message}
             )
 
-            message_object = create_snd_message(user_route, message)
+            message_object = create_snd_message(user_route_name, message)
 
             # パーティションキーでユーザーの項目を全て取得
             response = user_table.query(
                 IndexName="route-index",
-                KeyConditionExpression=Key(ROUTE_COLUMN_NAME).eq(user_route),
+                KeyConditionExpression=Key(ROUTE_COLUMN_NAME).eq(user_route_id),
             )
 
             user_list = [
@@ -426,7 +424,7 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
             for user_id in user_list:
                 snd_line_message(user_id, message_object)
 
-            new_delay_message = {"route": user_route, "messages": message}
+            new_delay_message = {"route": user_route_name, "messages": message}
             new_delay_messages_list.append(new_delay_message)
 
     return new_delay_messages_list
