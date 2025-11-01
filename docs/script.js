@@ -104,11 +104,16 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   async function loadAllRoutes() {
     try {
-      const response = await fetch('routes.json');
+      const response = await fetch('railway_list.json');
       if (!response.ok) throw new Error('路線リストの取得に失敗');
-      allRoutes = await response.json();
+      const railwayList = await response.json();
+      // データ構造を変換
+      allRoutes = railwayList.map(item => ({
+        line_name: item.route,
+        line_cd: item['odpt:railway']
+      }));
     } catch (error) {
-      console.error({ message: 'routes.jsonの読み込みエラー', function: 'loadAllRoutes', error });
+      console.error({ message: 'railway_list.jsonの読み込みエラー', function: 'loadAllRoutes', error });
       // 路線リストがなくてもアプリの他の機能は動作を続ける
     }
   }
@@ -270,15 +275,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveButton.addEventListener('click', async () => {
       // 保存する路線データを収集
       const routesToSave = Array.from(document.querySelectorAll('.route-input'))
-        .map(input => input.value.trim())
-        .filter(routeName => routeName !== '');
+        .map(input => {
+          const selectedRoute = allRoutes.find(r => r.line_name === input.value.trim());
+          return selectedRoute ? selectedRoute.line_cd : null;
+        })
+        .filter(routeId => routeId !== null);
 
-      // 候補にない路線名が入力されていないか簡易的にチェック
-      const allRouteNames = new Set(allRoutes.map(r => r.line_name));
-      const invalidRoute = routesToSave.find(r => !allRouteNames.has(r));
+      // 候補にない路線名が入力されていないかチェック
+      const allRouteCds = new Set(allRoutes.map(r => r.line_cd));
+      const invalidRoute = routesToSave.find(r => !allRouteCds.has(r));
       if (invalidRoute) {
-          alert(`「${invalidRoute}」は有効な路線名ではありません。候補から選択するか、正しい路線名を入力してください。`);
-          return;
+        const invalidRouteName = allRoutes.find(r => r.line_cd === invalidRoute)?.line_name || invalidRoute;
+        alert(`「${invalidRouteName}」は有効な路線名ではありません。候補から選択するか、正しい路線名を入力してください。`);
+        return;
       }
 
       const payload = {

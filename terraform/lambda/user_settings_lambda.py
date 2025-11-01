@@ -51,8 +51,6 @@ def get_line_user_id(body):
     if not auth_code:
         raise ValueError("認可コードが必要です。")
 
-    print("test")
-    print(auth_code)
     response = requests.post(
         LINE_TOKEN_URL,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -67,6 +65,15 @@ def get_line_user_id(body):
     print("test2")
     print(response)
 
+    # ステータスコードが200番台でない場合にエラーログを出力
+    if not response.ok:
+        logger.error(
+            "LINE APIへのリクエストでエラーが発生しました。",
+            extra={
+                "status_code": response.status_code,
+                "response_body": response.text,
+            },
+        )
     response.raise_for_status()
     response_json = response.json()
     id_token = response_json.get("id_token")
@@ -75,6 +82,15 @@ def get_line_user_id(body):
     verify_response = requests.post(
         LINE_VERIFY_URL, data={"id_token": id_token, "client_id": LINE_CHANNEL_ID}
     )
+    # ステータスコードが200番台でない場合にエラーログを出力
+    if not verify_response.ok:
+        logger.error(
+            "LINE API(verify)へのリクエストでエラーが発生しました。",
+            extra={
+                "status_code": verify_response.status_code,
+                "response_body": verify_response.text,
+            },
+        )
     verify_response.raise_for_status()
     verify_json = verify_response.json()
     line_user_id = verify_json.get("sub")
@@ -85,6 +101,11 @@ def get_line_user_id(body):
 
 def get_user_data(line_user_id):
     try:
+        # railway_list.jsonを読み込んで、IDと路線のマッピングを作成
+        with open("railway_list.json", "r", encoding="utf-8") as f:
+            railway_list = json.load(f)
+        railway_map = {item["odpt:railway"]: item["route"] for item in railway_list}
+
         response = table.query(
             KeyConditionExpression=boto3.dynamodb.conditions.Key("lineUserId").eq(
                 line_user_id
@@ -93,21 +114,26 @@ def get_user_data(line_user_id):
         items = response.get("Items", [])
         if not items:
             return None
+
         user_profile = {}
-        routes = []
+        route_ids = []
         for item in items:
             if item["settingOrRoute"] == PROFILE_KEY:
                 user_profile = item
             else:
-                routes.append(item["settingOrRoute"])
+                route_ids.append(item["settingOrRoute"])
+
+        # 路線IDを路線名に変換
+        routes = [railway_map.get(route_id, route_id) for route_id in route_ids]
+
         user_data = {
             "lineUserId": user_profile.get("lineUserId"),
             "routes": sorted(routes),
         }
         return user_data
-    except ClientError as e:
+    except (ClientError, FileNotFoundError) as e:
         logger.error(
-            f"DynamoDBからのユーザーデータ取得でエラーが発生しました: {e}",
+            f"ユーザーデータの取得でエラーが発生しました: {e}",
             exc_info=True,
         )
         raise

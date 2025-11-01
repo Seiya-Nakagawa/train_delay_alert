@@ -1,0 +1,530 @@
+[
+  {
+    "route": "JR吾妻線",
+    "odpt:railway": "odpt.Railway:JR-East.Agatsuma"
+  },
+  {
+    "route": "秋田新幹線",
+    "odpt:railway": "odpt.Railway:JR-East.AkitaShinkansen"
+  },
+  {
+    "route": "JR左沢線",
+    "odpt:railway": "odpt.Railway:JR-East.Aterazawa"
+  },
+  {
+    "route": "JR磐越東線",
+    "odpt:railway": "odpt.Railway:JR-East.BanetsuEast"
+  },
+  {
+    "route": "JR磐越西線",
+    "odpt:railway": "odpt.Railway:JR-East.BanetsuWest"
+  },
+  {
+    "route": "JR中央本線",
+    "odpt:railway": "odpt.Railway:JR-East.Chuo"
+  },
+  {
+    "route": "JR中央線快速",
+    "odpt:railway": "odpt.Railway:JR-East.ChuoRapid"
+  },
+  {
+    "route": "JR中央・総武線各駅停車",
+    "odpt:railway": "odpt.Railway:JR-East.ChuoSobuLocal"
+  },
+  {
+    "route": "JR中央本線（辰野支線）",
+    "odpt:railway": "odpt.Railway:JR-East.ChuoTatsunoBranch"
+  },
+  {
+    "route": "JR越後線",
+    "odpt:railway": "odpt.Railway:JR-East.Echigo"
+  },
+  {
+    "route": "JR五能線",
+    "odpt:railway": "odpt.Railway:JR-East.Gono"
+  },
+  {
+    "route": "JR八高線",
+    "odpt:railway": "odpt.Railway:JR-East.Hachiko"
+  },
+  {
+    "route": "JR八戸線",
+    "odpt:railway": "odpt.Railway:JR-East.Hachinohe"
+  },
+  {
+    "route": "JR白新線",
+    "odpt:railway": "odpt.Railway:JR-East.Hakushin"
+  },
+  {
+    "route": "JR花輪線",
+    "odpt:railway": "odpt.Railway:JR-East.Hanawa"
+  },
+  {
+    "route": "北陸新幹線",
+    "odpt:railway": "odpt.Railway:JR-East.HokurikuShinkansen"
+  },
+  {
+    "route": "JR飯山線",
+    "odpt:railway": "odpt.Railway:JR-East.Iiyama"
+  },
+  {
+    "route": "JR石巻線",
+    "odpt:railway": "odpt.Railway:JR-East.Ishinomaki"
+  },
+  {
+    "route": "JR伊東線",
+    "odpt:railway": "odpt.Railway:JR-East.Ito"
+  },
+  {
+    "route": "JR五日市線",
+    "odpt:railway": "odpt.Railway:JR-East.Itsukaichi"
+  },
+  {
+    "route": "JR常磐線",
+    "odpt:railway": "odpt.Railway:JR-East.Joban"
+  },
+  {
+    "route": "JR常磐線各駅停車",
+    "odpt:railway": "odpt.Railway:JR-East.JobanLocal"
+  },
+  {
+    "route": "JR常磐線快速",
+    "odpt:railway": "odpt.Railway:JR-East.JobanRapid"
+  },
+  {
+    "route": "JR上越線",
+    "odpt:railway": "odpt.Railway:JR-East.Joetsu"
+  },
+  {
+    "route": "上越新幹線",
+    "odpt:railway": "odpt.Railway:JR-East.JoetsuShinkansen"
+  },
+  {
+    "route": "JR釜石線",
+    "odpt:railway": "odpt.Railway:JR-East.Kamaishi"
+  },
+  {
+    "route": "JR烏山線",
+    "odpt:railway": "odpt.Railway:JR-East.Karasuyama"
+  },
+  {
+    "route": "JR鹿島線",
+    "odpt:railway": "odpt.Railway:JR-East.Kashima"
+  },
+  {
+    "route": "JR川越線",
+    "odpt:railway": "odpt.Railway:JR-East.Kawagoe"
+  },
+  {
+    "route": "JR京浜東北・根岸線",
+    "odpt:railway": "odpt.Railway:JR-East.KeihinTohokuNegishi"
+  },
+  {
+    "route": "JR京葉線",
+    "odpt:railway": "odpt.Railway:JR-East.Keiyo"
+  },
+  {
+    "route": "JR気仙沼線",
+    "odpt:railway": "odpt.Railway:JR-East.Kesennuma"
+  },
+  {
+    "route": "JR北上線",
+    "odpt:railway": "odpt.Railway:JR-East.Kitakami"
+  },
+  {
+    "route": "JR小海線",
+    "odpt:railway": "odpt.Railway:JR-East.Koumi"
+  },
+  {
+    "route": "JR久留里線",
+    "odpt:railway": "odpt.Railway:JR-East.Kururi"
+  },
+  {
+    "route": "JR水戸線",
+    "odpt:railway": "odpt.Railway:JR-East.Mito"
+  },
+  {
+    "route": "JR武蔵野線",
+    "odpt:railway": "odpt.Railway:JR-East.Musashino"
+  },
+  {
+    "route": "JR南武線",
+    "odpt:railway": "odpt.Railway:JR-East.Nambu"
+  },
+  {
+    "route": "JR南武線（浜川崎支線）",
+    "odpt:railway": "odpt.Railway:JR-East.NambuBranch"
+  },
+  {
+    "route": "JR成田線",
+    "odpt:railway": "odpt.Railway:JR-East.Narita"
+  },
+  {
+    "route": "JR成田線（我孫子-成田）",
+    "odpt:railway": "odpt.Railway:JR-East.NaritaAbikoBranch"
+  },
+  {
+    "route": "JR成田線（空港支線）",
+    "odpt:railway": "odpt.Railway:JR-East.NaritaAirportBranch"
+  },
+  {
+    "route": "JR日光線",
+    "odpt:railway": "odpt.Railway:JR-East.Nikko"
+  },
+  {
+    "route": "JR大船渡線",
+    "odpt:railway": "odpt.Railway:JR-East.Ofunato"
+  },
+  {
+    "route": "JR男鹿線",
+    "odpt:railway": "odpt.Railway:JR-East.Oga"
+  },
+  {
+    "route": "JR大糸線",
+    "odpt:railway": "odpt.Railway:JR-East.Oito"
+  },
+  {
+    "route": "JR青梅線",
+    "odpt:railway": "odpt.Railway:JR-East.Ome"
+  },
+  {
+    "route": "JR大湊線",
+    "odpt:railway": "odpt.Railway:JR-East.Ominato"
+  },
+  {
+    "route": "JR奥羽本線",
+    "odpt:railway": "odpt.Railway:JR-East.Ou"
+  },
+  {
+    "route": "JR奥羽本線（山形線）",
+    "odpt:railway": "odpt.Railway:JR-East.OuYamagata"
+  },
+  {
+    "route": "JR陸羽東線",
+    "odpt:railway": "odpt.Railway:JR-East.RikuEast"
+  },
+  {
+    "route": "JR陸羽西線",
+    "odpt:railway": "odpt.Railway:JR-East.RikuWest"
+  },
+  {
+    "route": "JR両毛線",
+    "odpt:railway": "odpt.Railway:JR-East.Ryomo"
+  },
+  {
+    "route": "JR相模線",
+    "odpt:railway": "odpt.Railway:JR-East.Sagami"
+  },
+  {
+    "route": "JR埼京・川越線",
+    "odpt:railway": "odpt.Railway:JR-East.SaikyoKawagoe"
+  },
+  {
+    "route": "JR仙石線",
+    "odpt:railway": "odpt.Railway:JR-East.Senseki"
+  },
+  {
+    "route": "JR仙石東北ライン",
+    "odpt:railway": "odpt.Railway:JR-East.SensekiTohoku"
+  },
+  {
+    "route": "JR仙山線",
+    "odpt:railway": "odpt.Railway:JR-East.Senzan"
+  },
+  {
+    "route": "JR信越本線",
+    "odpt:railway": "odpt.Railway:JR-East.Shinetsu"
+  },
+  {
+    "route": "JR篠ノ井線",
+    "odpt:railway": "odpt.Railway:JR-East.Shinonoi"
+  },
+  {
+    "route": "JR湘南新宿ライン",
+    "odpt:railway": "odpt.Railway:JR-East.ShonanShinjuku"
+  },
+  {
+    "route": "JR総武本線",
+    "odpt:railway": "odpt.Railway:JR-East.Sobu"
+  },
+  {
+    "route": "JR総武線快速",
+    "odpt:railway": "odpt.Railway:JR-East.SobuRapid"
+  },
+  {
+    "route": "JR相鉄直通線",
+    "odpt:railway": "odpt.Railway:JR-East.SotetsuDirect"
+  },
+  {
+    "route": "JR外房線",
+    "odpt:railway": "odpt.Railway:JR-East.Sotobo"
+  },
+  {
+    "route": "JR水郡線",
+    "odpt:railway": "odpt.Railway:JR-East.Suigun"
+  },
+  {
+    "route": "JR只見線",
+    "odpt:railway": "odpt.Railway:JR-East.Tadami"
+  },
+  {
+    "route": "JR高崎線",
+    "odpt:railway": "odpt.Railway:JR-East.Takasaki"
+  },
+  {
+    "route": "JR田沢湖線",
+    "odpt:railway": "odpt.Railway:JR-East.Tazawako"
+  },
+  {
+    "route": "JR東金線",
+    "odpt:railway": "odpt.Railway:JR-East.Togane"
+  },
+  {
+    "route": "JR東北本線",
+    "odpt:railway": "odpt.Railway:JR-East.Tohoku"
+  },
+  {
+    "route": "東北新幹線",
+    "odpt:railway": "odpt.Railway:JR-East.TohokuShinkansen"
+  },
+  {
+    "route": "JR東海道線",
+    "odpt:railway": "odpt.Railway:JR-East.Tokaido"
+  },
+  {
+    "route": "JR津軽線",
+    "odpt:railway": "odpt.Railway:JR-East.Tsugaru"
+  },
+  {
+    "route": "JR鶴見線",
+    "odpt:railway": "odpt.Railway:JR-East.Tsurumi"
+  },
+  {
+    "route": "JR鶴見線（大川支線）",
+    "odpt:railway": "odpt.Railway:JR-East.TsurumiOkawaBranch"
+  },
+  {
+    "route": "JR鶴見線（海芝浦支線）",
+    "odpt:railway": "odpt.Railway:JR-East.TsurumiUmiShibauraBranch"
+  },
+  {
+    "route": "JR内房線",
+    "odpt:railway": "odpt.Railway:JR-East.Uchibo"
+  },
+  {
+    "route": "JR羽越本線",
+    "odpt:railway": "odpt.Railway:JR-East.Uetsu"
+  },
+  {
+    "route": "JR宇都宮線",
+    "odpt:railway": "odpt.Railway:JR-East.Utsunomiya"
+  },
+  {
+    "route": "JR弥彦線",
+    "odpt:railway": "odpt.Railway:JR-East.Yahiko"
+  },
+  {
+    "route": "JR山田線",
+    "odpt:railway": "odpt.Railway:JR-East.Yamada"
+  },
+  {
+    "route": "山形新幹線",
+    "odpt:railway": "odpt.Railway:JR-East.YamagataShinkansen"
+  },
+  {
+    "route": "JR山手線",
+    "odpt:railway": "odpt.Railway:JR-East.Yamanote"
+  },
+  {
+    "route": "JR横浜線",
+    "odpt:railway": "odpt.Railway:JR-East.Yokohama"
+  },
+  {
+    "route": "JR横須賀線",
+    "odpt:railway": "odpt.Railway:JR-East.Yokosuka"
+  },
+  {
+    "route": "JR米坂線",
+    "odpt:railway": "odpt.Railway:JR-East.Yonesaka"
+  },
+  {
+    "route": "つくばエクスプレス",
+    "odpt:railway": "odpt.Railway:MIR.TsukubaExpress"
+  },
+  {
+    "route": "りんかい線",
+    "odpt:railway": "odpt.Railway:TWR.Rinkai"
+  },
+  {
+    "route": "多摩モノレール",
+    "odpt:railway": "odpt.Railway:TamaMonorail.TamaMonorail"
+  },
+  {
+    "route": "東武大師線",
+    "odpt:railway": "odpt.Railway:Tobu.Daishi"
+  },
+  {
+    "route": "東武伊勢崎線",
+    "odpt:railway": "odpt.Railway:Tobu.Isesaki"
+  },
+  {
+    "route": "東武亀戸線",
+    "odpt:railway": "odpt.Railway:Tobu.Kameido"
+  },
+  {
+    "route": "東武鬼怒川線",
+    "odpt:railway": "odpt.Railway:Tobu.Kinugawa"
+  },
+  {
+    "route": "東武桐生線",
+    "odpt:railway": "odpt.Railway:Tobu.Kiryu"
+  },
+  {
+    "route": "東武小泉線",
+    "odpt:railway": "odpt.Railway:Tobu.Koizumi"
+  },
+  {
+    "route": "東武小泉線（支線）",
+    "odpt:railway": "odpt.Railway:Tobu.KoizumiBranch"
+  },
+  {
+    "route": "東武日光線",
+    "odpt:railway": "odpt.Railway:Tobu.Nikko"
+  },
+  {
+    "route": "東武越生線",
+    "odpt:railway": "odpt.Railway:Tobu.Ogose"
+  },
+  {
+    "route": "東武佐野線",
+    "odpt:railway": "odpt.Railway:Tobu.Sano"
+  },
+  {
+    "route": "東武スカイツリーライン",
+    "odpt:railway": "odpt.Railway:Tobu.TobuSkytree"
+  },
+  {
+    "route": "東武スカイツリーライン（押上方面）",
+    "odpt:railway": "odpt.Railway:Tobu.TobuSkytreeBranch"
+  },
+  {
+    "route": "東武アーバンパークライン",
+    "odpt:railway": "odpt.Railway:Tobu.TobuUrbanPark"
+  },
+  {
+    "route": "東武東上線",
+    "odpt:railway": "odpt.Railway:Tobu.Tojo"
+  },
+  {
+    "route": "東武宇都宮線",
+    "odpt:railway": "odpt.Railway:Tobu.Utsunomiya"
+  },
+  {
+    "route": "東京さくらトラム（都電荒川線）",
+    "odpt:railway": "odpt.Railway:Toei.Arakawa"
+  },
+  {
+    "route": "都営浅草線",
+    "odpt:railway": "odpt.Railway:Toei.Asakusa"
+  },
+  {
+    "route": "都営三田線",
+    "odpt:railway": "odpt.Railway:Toei.Mita"
+  },
+  {
+    "route": "日暮里・舎人ライナー",
+    "odpt:railway": "odpt.Railway:Toei.NipporiToneri"
+  },
+  {
+    "route": "都営大江戸線",
+    "odpt:railway": "odpt.Railway:Toei.Oedo"
+  },
+  {
+    "route": "都営新宿線",
+    "odpt:railway": "odpt.Railway:Toei.Shinjuku"
+  },
+  {
+    "route": "東京メトロ千代田線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Chiyoda"
+  },
+  {
+    "route": "東京メトロ副都心線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Fukutoshin"
+  },
+  {
+    "route": "東京メトロ銀座線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Ginza"
+  },
+  {
+    "route": "東京メトロ半蔵門線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Hanzomon"
+  },
+  {
+    "route": "東京メトロ日比谷線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Hibiya"
+  },
+  {
+    "route": "東京メトロ丸ノ内線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Marunouchi"
+  },
+  {
+    "route": "東京メトロ丸ノ内線（分岐線）",
+    "odpt:railway": "odpt.Railway:TokyoMetro.MarunouchiBranch"
+  },
+  {
+    "route": "東京メトロ南北線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Namboku"
+  },
+  {
+    "route": "東京メトロ東西線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Tozai"
+  },
+  {
+    "route": "東京メトロ有楽町線",
+    "odpt:railway": "odpt.Railway:TokyoMetro.Yurakucho"
+  },
+  {
+    "route": "東急田園都市線",
+    "odpt:railway": "odpt.Railway:Tokyu.DenEnToshi"
+  },
+  {
+    "route": "東急池上線",
+    "odpt:railway": "odpt.Railway:Tokyu.Ikegami"
+  },
+  {
+    "route": "東急こどもの国線",
+    "odpt:railway": "odpt.Railway:Tokyu.Kodomonokuni"
+  },
+  {
+    "route": "東急目黒線",
+    "odpt:railway": "odpt.Railway:Tokyu.Meguro"
+  },
+  {
+    "route": "東急大井町線",
+    "odpt:railway": "odpt.Railway:Tokyu.Oimachi"
+  },
+  {
+    "route": "東急世田谷線",
+    "odpt:railway": "odpt.Railway:Tokyu.Setagaya"
+  },
+  {
+    "route": "東急新横浜線",
+    "odpt:railway": "odpt.Railway:Tokyu.TokyuShinYokohama"
+  },
+  {
+    "route": "東急多摩川線",
+    "odpt:railway": "odpt.Railway:Tokyu.TokyuTamagawa"
+  },
+  {
+    "route": "東急東横線",
+    "odpt:railway": "odpt.Railway:Tokyu.Toyoko"
+  },
+  {
+    "route": "横浜市営地下鉄ブルーライン",
+    "odpt:railway": "odpt.Railway:YokohamaMunicipal.Blue"
+  },
+  {
+    "route": "横浜市営地下鉄グリーンライン",
+    "odpt:railway": "odpt.Railway:YokohamaMunicipal.Green"
+  }
+]
