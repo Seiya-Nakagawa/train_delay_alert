@@ -55,6 +55,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
       USER_TABLE_NAME                = aws_dynamodb_table.users.name
       FRONTEND_REDIRECT_URL          = var.frontend_redirect_url
       FRONTEND_ORIGIN                = var.frontend_origin
+      S3_OUTPUT_BUCKET               = aws_s3_bucket.s3_train_alert.id
     }
   }
 

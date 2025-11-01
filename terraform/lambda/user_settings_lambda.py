@@ -384,9 +384,10 @@ def lambda_handler(event, context):
             }
         elif "lineUserId" in body:
             post_user_data(body)
+            line_user_id = body.get("lineUserId")
             logger.info(
-                f"ユーザー情報を更新しました: {body.get('lineUserId')}",
-                extra={"line_user_id": body.get("lineUserId")},
+                f"ユーザー情報を更新しました: {line_user_id}",
+                extra={"line_user_id": line_user_id},
             )
 
             s3_update_user_list(line_user_id)
