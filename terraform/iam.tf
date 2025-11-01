@@ -60,3 +60,9 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_s3" {
   role       = aws_iam_role.lambda_exec_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
+
+# SNSへのアクセスを許可するポリシー
+resource "aws_iam_role_policy_attachment" "lambda_policy_sns" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+}

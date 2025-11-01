@@ -64,8 +64,6 @@ def get_line_user_id(body):
             "client_secret": LINE_CHANNEL_SECRET,
         },
     )
-    print("test2")
-    print(response)
 
     # ステータスコードが200番台でない場合にエラーログを出力
     if not response.ok:
@@ -394,18 +392,15 @@ def lambda_handler(event, context):
 
             s3_update_user_list(line_user_id)
 
-            # --- SNS通知 ---
-            if SNS_TOPIC_ARN:
-                try:
-                    message = f"新しいユーザーが登録/更新されました。\nLINE User ID: {line_user_id}"
-                    subject = "【Train Delay Alert】ユーザー登録通知"
-                    sns_client.publish(
-                        TopicArn=SNS_TOPIC_ARN, Message=message, Subject=subject
-                    )
-                    logger.info("SNSにユーザー登録通知を送信しました。")
-                except ClientError as e:
-                    logger.error(f"SNSへの通知送信に失敗しました: {e}", exc_info=True)
-            # --- ここまで ---
+            try:
+                message = f"新しいユーザーが登録/更新されました。\nLINE User ID: {line_user_id}"
+                subject = "【Train Delay Alert】ユーザー登録通知"
+                sns_client.publish(
+                    TopicArn=SNS_TOPIC_ARN, Message=message, Subject=subject
+                )
+                logger.info("SNSにユーザー登録通知を送信しました。")
+            except ClientError as e:
+                logger.error(f"SNSへの通知送信に失敗しました: {e}", exc_info=True)
 
             return {
                 "statusCode": 200,
