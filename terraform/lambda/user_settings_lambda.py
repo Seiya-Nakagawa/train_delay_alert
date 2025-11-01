@@ -52,10 +52,12 @@ def get_line_user_id(body):
         raise ValueError("認可コードが必要です。")
 
     # デバッグ用に変数の値をログに出力
-    logger.debug(f"LINE APIリクエストのパラメータ:")
+    logger.debug("LINE APIリクエストのパラメータ:")
     logger.debug(f"  redirect_uri: {FRONTEND_REDIRECT_URL}")
     logger.debug(f"  client_id: {LINE_CHANNEL_ID}")
-    logger.debug(f"  client_secret: {'********' if LINE_CHANNEL_SECRET else None}") # シークレットはマスク
+    logger.debug(
+        f"  client_secret: {'********' if LINE_CHANNEL_SECRET else None}"
+    )  # シークレットはマスク
 
     response = requests.post(
         LINE_TOKEN_URL,
@@ -104,7 +106,6 @@ def get_user_data(line_user_id):
         user_data = {
             "lineUserId": user_profile.get("lineUserId"),
             "routes": sorted(routes),
-            "isAllDay": user_profile.get("isAllDay", False),
         }
         return user_data
     except ClientError as e:
@@ -113,6 +114,7 @@ def get_user_data(line_user_id):
             exc_info=True,
         )
         raise
+
 
 def get_s3_object(bucket_name, key):
     """S3から指定されたオブジェクトを取得し、内容をPythonのリストとして返す.
@@ -132,14 +134,19 @@ def get_s3_object(bucket_name, key):
     Raises:
         ClientError: S3へのアクセス中に'NoSuchKey'以外の予期せぬエラーが発生した場合。
     """
-    logger.info(f"S3オブジェクトを取得します。", extra={"bucket": bucket_name, "key": key})
+    logger.info(
+        "S3オブジェクトを取得します。", extra={"bucket": bucket_name, "key": key}
+    )
     try:
         response_s3flagfile = s3_client.get_object(Bucket=bucket_name, Key=key)
         file_content_string = response_s3flagfile["Body"].read().decode("utf-8")
 
         # ファイルが空かチェック
         if not file_content_string.strip():
-            logger.warning(f"S3ファイル'{key}'は空です。空のリストを返します。", extra={"bucket": bucket_name, "key": key})
+            logger.warning(
+                f"S3ファイル'{key}'は空です。空のリストを返します。",
+                extra={"bucket": bucket_name, "key": key},
+            )
             return []
 
         s3_object_list = json.loads(file_content_string)
@@ -148,23 +155,33 @@ def get_s3_object(bucket_name, key):
         if not isinstance(s3_object_list, list):
             logger.warning(
                 f"S3ファイル'{key}'はJSONリスト形式ではありません。空のリストを返します。",
-                extra={"bucket": bucket_name, "key": key}
+                extra={"bucket": bucket_name, "key": key},
             )
             return []
 
         logger.info(
             f"S3オブジェクト'{key}'から {len(s3_object_list)} 件の項目を読み込みました。",
-            extra={"bucket": bucket_name, "key": key, "item_count": len(s3_object_list)}
+            extra={
+                "bucket": bucket_name,
+                "key": key,
+                "item_count": len(s3_object_list),
+            },
         )
         return s3_object_list
     except ClientError as e:
         # オブジェクトが存在しない場合は正常なケースとしてNoneを返す
         if e.response["Error"]["Code"] == "NoSuchKey":
-            logger.info(f"S3オブジェクト'{key}'が見つかりませんでした。", extra={"bucket": bucket_name, "key": key})
+            logger.info(
+                f"S3オブジェクト'{key}'が見つかりませんでした。",
+                extra={"bucket": bucket_name, "key": key},
+            )
             return None
         else:
             # その他のAWSエラーは例外を再送出
-            logger.error(f"S3へのアクセス中に予期せぬエラーが発生しました: {e}", extra={"bucket": bucket_name, "key": key})
+            logger.error(
+                f"S3へのアクセス中に予期せぬエラーが発生しました: {e}",
+                extra={"bucket": bucket_name, "key": key},
+            )
             raise
 
 
@@ -197,7 +214,6 @@ def post_user_data(user_data):
             profile_item = {
                 "lineUserId": line_user_id,
                 "settingOrRoute": PROFILE_KEY,
-                "isAllDay": user_data.get("isAllDay"),
             }
             batch.put_item(Item=profile_item)
 
@@ -213,15 +229,12 @@ def post_user_data(user_data):
                     Key={"lineUserId": line_user_id, "settingOrRoute": route}
                 )
 
-    except ClientError as e:
-        logger.error(
-            f"DynamoDBへのユーザーデータ登録でエラーが発生しました: {e}", exc_info=True
-        )
-        raise
-
         # 路線情報に変更があった場合のみS3に通知
         if routes_to_add or routes_to_delete:
-            logger.info(f"ユーザー'{line_user_id}'の路線情報が変更されたため、S3に通知します。", extra={"line_user_id": line_user_id})
+            logger.info(
+                f"ユーザー'{line_user_id}'の路線情報が変更されたため、S3に通知します。",
+                extra={"line_user_id": line_user_id},
+            )
             # S3のuser-list.jsonにユーザーIDを追記
             try:
                 # 既存のリストを取得、なければ新規作成
@@ -230,28 +243,53 @@ def post_user_data(user_data):
                 # ユーザーIDがリストになければ追加
                 if line_user_id not in user_list:
                     user_list.append(line_user_id)
-                    logger.info(f"ユーザーID'{line_user_id}'をS3ファイルに追加します。", extra={"line_user_id": line_user_id})
+                    logger.info(
+                        f"ユーザーID'{line_user_id}'をS3ファイルに追加します。",
+                        extra={"line_user_id": line_user_id},
+                    )
 
                     # 更新したリストをS3に書き戻す
-                    user_list_string = json.dumps(user_list, indent=2, ensure_ascii=False)
-                    s3_client.put_object(
-                        Bucket=S3_BUCKET_NAME, Key=USER_LIST_FILE_KEY, Body=user_list_string
+                    user_list_string = json.dumps(
+                        user_list, indent=2, ensure_ascii=False
                     )
-                    logger.info(f"S3ファイル'{USER_LIST_FILE_KEY}'を更新しました。", extra={"file_key": USER_LIST_FILE_KEY})
+                    s3_client.put_object(
+                        Bucket=S3_BUCKET_NAME,
+                        Key=USER_LIST_FILE_KEY,
+                        Body=user_list_string,
+                    )
+                    logger.info(
+                        f"S3ファイル'{USER_LIST_FILE_KEY}'を更新しました。",
+                        extra={"file_key": USER_LIST_FILE_KEY},
+                    )
                 else:
-                    logger.info(f"ユーザーID'{line_user_id}'は既にリストに存在するため、S3ファイルの更新はスキップします。", extra={"line_user_id": line_user_id})
+                    logger.info(
+                        f"ユーザーID'{line_user_id}'は既にリストに存在するため、S3ファイルの更新はスキップします。",
+                        extra={"line_user_id": line_user_id},
+                    )
 
             except Exception as e:
-                logger.error(f"S3へのユーザーリスト書き込みでエラーが発生しました: {e}", exc_info=True)
+                logger.error(
+                    f"S3へのユーザーリスト書き込みでエラーが発生しました: {e}",
+                    exc_info=True,
+                )
                 # DynamoDBへの保存は成功しているので、ここでは例外を再送出しない
         else:
-            logger.info(f"ユーザー'{line_user_id}'の路線情報に変更がないため、S3通知はスキップします。", extra={"line_user_id": line_user_id})
+            logger.info(
+                f"ユーザー'{line_user_id}'の路線情報に変更がないため、S3通知はスキップします。",
+                extra={"line_user_id": line_user_id},
+            )
+
+    except ClientError as e:
+        logger.error(
+            f"DynamoDBへのユーザーデータ登録でエラーが発生しました: {e}", exc_info=True
+        )
+        raise
 
 
 # --- メインハンドラ (変更なし) ---
 def lambda_handler(event, context):
     try:
-        body = json.loads(event.get("body", "{}"))
+        body = json.loads(event.get("body") or "{}")
         logger.info("Received event", extra={"event_body": body})
         if "authorizationCode" in body:
             line_user_id = get_line_user_id(body)
@@ -268,7 +306,6 @@ def lambda_handler(event, context):
                 user_data = {
                     "lineUserId": line_user_id,
                     "routes": [],
-                    "isAllDay": False,
                 }
             logger.info(
                 "ユーザーデータの取得/作成に成功しました。レスポンスを返します。",

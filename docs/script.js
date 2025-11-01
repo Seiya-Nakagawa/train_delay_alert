@@ -21,10 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const messageArea = document.getElementById('messageArea');
   const messageText = document.getElementById('messageText');
   const formContainer = document.getElementById('formContainer');
-  const startTimeInput = document.getElementById('startTime');
-  const endTimeInput = document.getElementById('endTime');
-  const allDayCheckbox = document.getElementById('allDayCheckbox');
-  const timeInputs = document.getElementById('timeInputs');
 
 
   // アプリケーション全体で利用する定数と変数
@@ -126,9 +122,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // デストラクチャリングとデフォルト値の設定
     const {
       routes = [],
-      notificationStartTime = '07:00',
-      notificationEndTime = '09:00',
-      isAllDay = false,
     } = userData;
 
     // 路線リストをクリアしてから、登録済みの路線をフォームに追加
@@ -273,11 +266,6 @@ document.addEventListener('DOMContentLoaded', async () => {
    * ページ内のすべての対話要素にイベントハンドラを割り当てます。
    */
   function setupEventListeners() {
-    // 「全時間帯」チェックボックスの変更イベント
-    allDayCheckbox.addEventListener('change', () => {
-      timeInputs.style.display = allDayCheckbox.checked ? 'none' : '';
-    });
-
     // 保存ボタンのクリックイベント
     saveButton.addEventListener('click', async () => {
       // 保存する路線データを収集
@@ -296,9 +284,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const payload = {
         lineUserId: lineUserId,
         routes: routesToSave,
-        notificationStartTime: startTimeInput.value,
-        notificationEndTime: endTimeInput.value,
-        isAllDay: allDayCheckbox.checked,
       };
 
       displayMessage('保存中...', false);
