@@ -108,6 +108,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
       TRAIN_STATUS_TABLE_NAME           = aws_dynamodb_table.train_status.name
       USER_TABLE_NAME                   = aws_dynamodb_table.users.name
       NG_WORD                           = var.ng_word[0]
+      RESPONSE_TIMEOUT                  = var.response_timeout
     }
   }
 

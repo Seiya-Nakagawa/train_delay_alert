@@ -58,6 +58,11 @@ variable "ng_word" {
   type        = list(string)
 }
 
+variable "response_timeout" {
+  description = "responseのタイムアウト（秒）"
+  type        = number
+}
+
 # -----------------------------------------------------------------------------
 # Notification
 # -----------------------------------------------------------------------------

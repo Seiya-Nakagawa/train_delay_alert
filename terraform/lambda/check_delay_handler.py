@@ -35,7 +35,6 @@ NG_WORD = os.environ.get("NG_WORD")
 USER_LIST_FILE_KEY = "user-list.json"  # 処理対象のユーザーリストが格納されたS3キー
 ROUTE_LIST_FILE_KEY = "route-list.json"  # 全ユーザーの登録路線リスト
 DELAY_MESSAGES_FILE_KEY = "delay-messages.json"  # 現在遅延中の路線リストのキャッシュ
-
 RAILWAY_LIST_FILE_NAME = "railway_list.json"
 
 # --- DynamoDBテーブルキー設定 ---
@@ -118,14 +117,19 @@ def get_s3_object(bucket_name, key):
     Raises:
         ClientError: S3へのアクセス中に'NoSuchKey'以外の予期せぬエラーが発生した場合。
     """
-    logger.info(f"S3オブジェクトを取得します。", extra={"bucket": bucket_name, "key": key})
+    logger.info(
+        "S3オブジェクトを取得します。", extra={"bucket": bucket_name, "key": key}
+    )
     try:
         response_s3flagfile = s3_client.get_object(Bucket=bucket_name, Key=key)
         file_content_string = response_s3flagfile["Body"].read().decode("utf-8")
 
         # ファイルが空かチェック
         if not file_content_string.strip():
-            logger.warning(f"S3ファイル'{key}'は空です。空のリストを返します。", extra={"bucket": bucket_name, "key": key})
+            logger.warning(
+                f"S3ファイル'{key}'は空です。空のリストを返します。",
+                extra={"bucket": bucket_name, "key": key},
+            )
             return []
 
         s3_object_list = json.loads(file_content_string)
@@ -134,23 +138,33 @@ def get_s3_object(bucket_name, key):
         if not isinstance(s3_object_list, list):
             logger.warning(
                 f"S3ファイル'{key}'はJSONリスト形式ではありません。空のリストを返します。",
-                extra={"bucket": bucket_name, "key": key}
+                extra={"bucket": bucket_name, "key": key},
             )
             return []
 
         logger.info(
             f"S3オブジェクト'{key}'から {len(s3_object_list)} 件の項目を読み込みました。",
-            extra={"bucket": bucket_name, "key": key, "item_count": len(s3_object_list)}
+            extra={
+                "bucket": bucket_name,
+                "key": key,
+                "item_count": len(s3_object_list),
+            },
         )
         return s3_object_list
     except ClientError as e:
         # オブジェクトが存在しない場合は正常なケースとしてNoneを返す
         if e.response["Error"]["Code"] == "NoSuchKey":
-            logger.info(f"S3オブジェクト'{key}'が見つかりませんでした。", extra={"bucket": bucket_name, "key": key})
+            logger.info(
+                f"S3オブジェクト'{key}'が見つかりませんでした。",
+                extra={"bucket": bucket_name, "key": key},
+            )
             return None
         else:
             # その他のAWSエラーは例外を再送出
-            logger.error(f"S3へのアクセス中に予期せぬエラーが発生しました: {e}", extra={"bucket": bucket_name, "key": key})
+            logger.error(
+                f"S3へのアクセス中に予期せぬエラーが発生しました: {e}",
+                extra={"bucket": bucket_name, "key": key},
+            )
             raise
 
 
@@ -168,7 +182,9 @@ def get_line_list(s3_lineuserid_list):
         return []
 
     user_route_list = []
-    logger.info(f"DynamoDBから {len(s3_lineuserid_list)} 人のユーザーの路線情報取得を開始します。")
+    logger.info(
+        f"DynamoDBから {len(s3_lineuserid_list)} 人のユーザーの路線情報取得を開始します。"
+    )
 
     for user_id in s3_lineuserid_list:
         try:
@@ -186,15 +202,21 @@ def get_line_list(s3_lineuserid_list):
             ]
 
             if route_list:
-                logger.debug(f"ユーザー'{user_id}'の路線が {len(route_list)} 件見つかりました。", extra={"user_id": user_id, "route_count": len(route_list)})
+                logger.debug(
+                    f"ユーザー'{user_id}'の路線が {len(route_list)} 件見つかりました。",
+                    extra={"user_id": user_id, "route_count": len(route_list)},
+                )
                 user_route_list.extend(route_list)
             else:
-                logger.debug(f"ユーザー'{user_id}'の路線は見つかりませんでした。", extra={"user_id": user_id})
+                logger.debug(
+                    f"ユーザー'{user_id}'の路線は見つかりませんでした。",
+                    extra={"user_id": user_id},
+                )
 
         except ClientError as e:
             logger.error(
                 f"ユーザー'{user_id}'のデータ取得に失敗しました: {e.response['Error']['Message']}",
-                extra={"user_id": user_id}
+                extra={"user_id": user_id},
             )
             continue  # エラーが発生したユーザーはスキップして処理を続行
 
@@ -202,7 +224,7 @@ def get_line_list(s3_lineuserid_list):
     unique_user_route_list = list(set(user_route_list))
     logger.info(
         f"全ユーザーから合計 {len(unique_user_route_list)} 件のユニークな路線が見つかりました。",
-        extra={"unique_route_count": len(unique_user_route_list)}
+        extra={"unique_route_count": len(unique_user_route_list)},
     )
     logger.debug(f"ユニークな路線リスト: {unique_user_route_list}")
 
@@ -229,15 +251,18 @@ def get_realtime_train_information():
 
             response_data = response.json()
             realtime_data_list.extend(response_data)
-            logger.debug(f"{len(response_data)} 件のレコードを取得しました。", extra={"url": url, "record_count": len(response_data)})
+            logger.debug(
+                f"{len(response_data)} 件のレコードを取得しました。",
+                extra={"url": url, "record_count": len(response_data)},
+            )
 
         logger.info(
             f"取得完了。合計 {len(realtime_data_list)} 件のレコードを取得しました。",
-            extra={"total_record_count": len(realtime_data_list)}
+            extra={"total_record_count": len(realtime_data_list)},
         )
         return realtime_data_list
 
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         logger.error("APIへのリクエストに失敗しました。", exc_info=True)
         return None
 
@@ -252,7 +277,10 @@ def create_snd_message(user_route, message):
     Returns:
         dict: LINE Flex MessageのJSONオブジェクト。
     """
-    logger.info(f"路線'{user_route}'のFlex Messageを作成します。", extra={"user_route": user_route})
+    logger.info(
+        f"路線'{user_route}'のFlex Messageを作成します。",
+        extra={"user_route": user_route},
+    )
     # LINEのFlex Message Simulatorで作成したJSONをテンプレートとして使用
     message_object = {
         "type": "flex",
@@ -317,7 +345,10 @@ def snd_line_message(user_id, message_object):
     Returns:
         bool: 送信が成功した場合はTrue、失敗した場合はFalse。
     """
-    logger.info(f"ユーザー'{user_id}'にLINEメッセージを送信します...", extra={"user_id": user_id})
+    logger.info(
+        f"ユーザー'{user_id}'にLINEメッセージを送信します...",
+        extra={"user_id": user_id},
+    )
 
     headers = {
         "Content-Type": "application/json",
@@ -334,13 +365,17 @@ def snd_line_message(user_id, message_object):
         response.raise_for_status()  # HTTPエラーがあれば例外を発生させる
 
         logger.info(
-            f"メッセージの送信に成功しました。",
-            extra={"user_id": user_id, "status_code": response.status_code}
+            "メッセージの送信に成功しました。",
+            extra={"user_id": user_id, "status_code": response.status_code},
         )
         return True
 
-    except requests.exceptions.RequestException as e:
-        logger.error("LINEへのメッセージ送信に失敗しました。", extra={"user_id": user_id}, exc_info=True)
+    except requests.exceptions.RequestException:
+        logger.error(
+            "LINEへのメッセージ送信に失敗しました。",
+            extra={"user_id": user_id},
+            exc_info=True,
+        )
         return False
 
 
@@ -348,9 +383,11 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
     # アクティブユーザーが設定した各路線について遅延をチェック
     new_delay_messages_list = []
     id_to_name_map = {item["odpt:railway"]: item["route"] for item in railway_list}
-    ng_words = [word.strip() for word in NG_WORD.split(',')] if NG_WORD else []
+    ng_words = [word.strip() for word in NG_WORD.split(",")] if NG_WORD else []
 
-    logger.info(f"アクティブユーザーの {len(user_route_list)} 件の路線の処理を開始します。")
+    logger.info(
+        f"アクティブユーザーの {len(user_route_list)} 件の路線の処理を開始します。"
+    )
     for user_route_id in user_route_list:
         user_route_name = id_to_name_map.get(user_route_id)
         if not user_route_name:
@@ -360,7 +397,10 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
             )
             continue
 
-        logger.debug(f"--- 路線'{user_route_name}'の処理を開始 ---", extra={"user_route": user_route_name})
+        logger.debug(
+            f"--- 路線'{user_route_name}'の処理を開始 ---",
+            extra={"user_route": user_route_name},
+        )
         send_flg = False
         message = None
 
@@ -372,10 +412,13 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
         if not message:
             logger.warning(
                 f"鉄道名'{user_route_id}'のリアルタイム情報が見つかりませんでした。スキップします。",
-                extra={"railway_name": user_route_id}
+                extra={"railway_name": user_route_id},
             )
             continue
-        logger.debug(f"運行情報メッセージが見つかりました: '{message}'", extra={"railway_name": user_route_id, "message": message})
+        logger.debug(
+            f"運行情報メッセージが見つかりました: '{message}'",
+            extra={"railway_name": user_route_id, "message": message},
+        )
 
         # 取得した運行情報が、既に通知済のメッセージかチェック
         is_new_message = True
@@ -384,10 +427,10 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
                 is_new_message = False
                 logger.info(
                     "このメッセージは既に通知済みです。スキップします。",
-                    extra={"message": message}
+                    extra={"message": message},
                 )
                 break
-        
+
         if is_new_message:
             # 遅延のメッセージ内容かチェック
             is_delay = False
@@ -396,7 +439,7 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
                     if ng_word in message:
                         is_delay = True
                         break
-            else: # NG_WORDが設定されてなければ、新しいメッセージはすべて遅延とみなす
+            else:  # NG_WORDが設定されてなければ、新しいメッセージはすべて遅延とみなす
                 is_delay = True
 
             if is_delay:
@@ -406,7 +449,7 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
         if send_flg:
             logger.info(
                 "新規の遅延またはステータス変更を検知しました。通知の準備をします。",
-                extra={"user_route": user_route_name, "message": message}
+                extra={"user_route": user_route_name, "message": message},
             )
 
             message_object = create_snd_message(user_route_name, message)
@@ -460,11 +503,15 @@ def lambda_handler(event, context):
         s3_delay_list = get_s3_object(S3_BUCKET_NAME, DELAY_MESSAGES_FILE_KEY) or []
 
         if not s3_lineuserid_list:
-            logger.info("フラグファイルにユーザーIDが見つかりませんでした。S3キャッシュの路線のみ使用します。")
+            logger.info(
+                "フラグファイルにユーザーIDが見つかりませんでした。S3キャッシュの路線のみ使用します。"
+            )
             user_route_list = []
         else:
             # 設定変更のあったユーザーの路線情報をDynamoDBから取得
-            logger.info(f"{len(s3_lineuserid_list)} 件のユーザーIDを読み込みました。DynamoDBから路線情報を取得します。")
+            logger.info(
+                f"{len(s3_lineuserid_list)} 件のユーザーIDを読み込みました。DynamoDBから路線情報を取得します。"
+            )
             user_route_list = get_line_list(s3_lineuserid_list)
             # DynamoDBから取得したリストとS3キャッシュをマージし、最新の状態でS3に保存
             s3_route_list = list(set(user_route_list + s3_route_list))
@@ -473,7 +520,9 @@ def lambda_handler(event, context):
         s3_client.put_object(
             Bucket=S3_BUCKET_NAME, Key=ROUTE_LIST_FILE_KEY, Body=route_string
         )
-        logger.info(f"統合後の路線リストをS3キャッシュ'{ROUTE_LIST_FILE_KEY}'に保存しました。")
+        logger.info(
+            f"統合後の路線リストをS3キャッシュ'{ROUTE_LIST_FILE_KEY}'に保存しました。"
+        )
 
         # --- 3. リアルタイム運行情報の取得 ---
         realtime_data_list = get_realtime_train_information()
@@ -484,7 +533,10 @@ def lambda_handler(event, context):
         # ローカルのJSONファイルから路線マッピングと無視するメッセージリストを読み込む
         with open(RAILWAY_LIST_FILE_NAME, "r", encoding="utf-8") as f:
             railway_list = json.load(f)
-        logger.info(f"{len(railway_list)} 件の路線・鉄道マッピングを読み込みました。", extra={"mapping_count": len(railway_list)})
+        logger.info(
+            f"{len(railway_list)} 件の路線・鉄道マッピングを読み込みました。",
+            extra={"mapping_count": len(railway_list)},
+        )
 
         # --- 5. 遅延判定と通知処理 ---
         new_delay_messages_list = delay_check(
