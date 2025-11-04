@@ -36,10 +36,6 @@ resource "aws_lambda_function" "user_settings_lambda" {
   # デプロイパッケージの指定
   filename = "${path.module}/lambda/user_settings_lambda.zip"
 
-  # lifecycle {
-  #   ignore_changes = [filename, source_code_hash]
-  # }
-
   # 共通ライブラリレイヤーをアタッチ
   layers = [aws_lambda_layer_version.dependencies_layer.arn]
 
@@ -77,7 +73,7 @@ resource "aws_lambda_function_url" "user_settings_url" {
     allow_credentials = false
     allow_origins     = [var.frontend_origin]
     allow_methods     = ["*"]
-    allow_headers     = ["Content-Type"]
+    allow_headers     = ["content-Type"]
     max_age           = 86400 # 1日
   }
 }
@@ -96,10 +92,6 @@ resource "aws_lambda_function" "check_delay_lambda" {
 
   # デプロイパッケージ
   filename = "${path.module}/lambda/check_delay_handler.zip"
-
-  # lifecycle {
-  #   ignore_changes = [filename, source_code_hash]
-  # }
 
   layers = [aws_lambda_layer_version.dependencies_layer.arn]
 
