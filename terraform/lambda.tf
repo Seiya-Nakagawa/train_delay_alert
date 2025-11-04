@@ -35,7 +35,10 @@ resource "aws_lambda_function" "user_settings_lambda" {
 
   # デプロイパッケージの指定
   filename         = data.archive_file.user_settings_lambda_function_zip.output_path
-  source_code_hash = data.archive_file.user_settings_lambda_function_zip.output_base64sha256
+  source_code_hash = base64sha256(join("", [
+    file("${path.module}/lambda/user_settings_lambda.py"),
+    file("${path.module}/lambda/railway_list.json")
+  ]))
 
   # 共通ライブラリレイヤーをアタッチ
   layers = [aws_lambda_layer_version.dependencies_layer.arn]
@@ -93,7 +96,10 @@ resource "aws_lambda_function" "check_delay_lambda" {
 
   # デプロイパッケージ
   filename         = data.archive_file.check_delay_handler_function_zip.output_path
-  source_code_hash = data.archive_file.check_delay_handler_function_zip.output_base64sha256
+  source_code_hash = base64sha256(join("", [
+    file("${path.module}/lambda/check_delay_handler.py"),
+    file("${path.module}/lambda/railway_list.json")
+  ]))
 
   layers = [aws_lambda_layer_version.dependencies_layer.arn]
 
