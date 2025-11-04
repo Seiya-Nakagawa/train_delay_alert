@@ -56,7 +56,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_train_alert" {
 
     # 非現行（古い）バージョンのオブジェクトに対するアクション
     noncurrent_version_expiration {
-      noncurrent_days = 1 # 1日経過した非現行バージョンを対象
+      noncurrent_days           = 1 # 1日経過した非現行バージョンを対象
       newer_noncurrent_versions = 2 # 最新の非現行バージョンを2つ保持
     }
   }
@@ -67,26 +67,26 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_train_alert" {
 # -----------------------------------------------------------------------------
 
 # S3バケット内にフォルダを作成
-resource "aws_s3_object" "folders" {
-  # local.s3_folder_namesの各要素に対してリソースを作成
-  for_each = local.s3_folder_names
+# resource "aws_s3_object" "folders" {
+#   # local.s3_folder_namesの各要素に対してリソースを作成
+#   for_each = local.s3_folder_names
 
-  bucket = aws_s3_bucket.s3_train_alert.id
+#   bucket = aws_s3_bucket.s3_train_alert.id
 
-  # キーの末尾に "/" をつけることでフォルダとして扱われる
-  key = each.key
+#   # キーの末尾に "/" をつけることでフォルダとして扱われる
+#   key = each.key
 
-  # フォルダであることを示すContent-Type
-  content_type = "application/x-directory"
+#   # フォルダであることを示すContent-Type
+#   content_type = "application/x-directory"
 
-  # 空のコンテンツのMD5ハッシュ値を指定
-  etag = md5("")
-}
+#   # 空のコンテンツのMD5ハッシュ値を指定
+#   etag = md5("")
+# }
 
 # LambdaレイヤーのZIPファイルをS3にアップロード
-resource "aws_s3_object" "lambda_layer_zip" {
-  bucket = aws_s3_bucket.s3_train_alert.id
-  key    = "lambda-layers/python_libraries.zip" # S3内でのオブジェクトキー
-  source = data.archive_file.lambda_layer.output_path
-  etag   = data.archive_file.lambda_layer.output_md5
-}
+# resource "aws_s3_object" "lambda_layer_zip" {
+#   bucket = aws_s3_bucket.s3_train_alert.id
+#   key    = "lambda-layers/python_libraries.zip" # S3内でのオブジェクトキー
+#   source = data.archive_file.lambda_layer.output_path
+#   etag   = data.archive_file.lambda_layer.output_md5
+# }
