@@ -15,7 +15,7 @@ resource "aws_lambda_layer_version" "dependencies_layer" {
   # レイヤーのコンテンツとなるZIPファイルをS3から指定
   s3_bucket         = aws_s3_bucket.s3_train_alert.id
   s3_key            = aws_s3_object.lambda_layer_zip.key
-  s3_object_version = aws_s3_object.lambda_layer_zip.version_id
+source_code_hash = filebase64sha256(local.lambda_layer_zip_path)
 
   # このレイヤーが互換性を持つランタイムを指定
   compatible_runtimes = var.lambda_runtime_version
