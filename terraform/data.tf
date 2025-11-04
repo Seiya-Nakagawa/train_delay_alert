@@ -5,6 +5,15 @@
 # ここでは、Lambda関数コードをZIPファイルにアーカイブするために使用しています。
 
 # -----------------------------------------------------------------------------
+# Archive for Lambda Layer
+# -----------------------------------------------------------------------------
+data "archive_file" "lambda_layer" {
+  type        = "zip"
+  source_dir  = "${path.module}/lambda-layers/python"
+  output_path = "${path.module}/build/python_libraries.zip"
+}
+
+# -----------------------------------------------------------------------------
 # Archive for user_settings_lambda
 # -----------------------------------------------------------------------------
 # user_settings_lambda.py をZIP化します。

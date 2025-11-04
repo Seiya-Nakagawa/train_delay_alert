@@ -5,20 +5,18 @@
 # 繰り返し使用する値や、複雑な式に名前を付けるために使用します。
 
 locals {
-  # リソース名などに付与する共通のプレフィックス (例: train-delay-alert-prd)
+  # 共通のプレフィックスを定義
   name_prefix = "${var.system_name}-${var.env}"
 
-  # S3バケットに作成するフォルダ名のリスト
-  s3_folder_names = toset([
-    "lambda-layers/",
-  ])
-
-  # LambdaレイヤーとしてアップロードするZIPファイルのローカルパス
-  lambda_layer_zip_path = "${path.module}/lambda-layers/python_libraries.zip"
-
-  # すべてのリソースに付与する共通のタグ
+  # 共通のタグを定義
   tags = {
-    SystemName = var.system_name,
+    SystemName = var.system_name
     Env        = var.env
   }
+
+  # S3に作成するフォルダ名のリスト
+  s3_folder_names = toset([
+    "lambda-layers/",
+    "train-status-logs/"
+  ])
 }

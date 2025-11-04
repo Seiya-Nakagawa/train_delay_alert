@@ -12,12 +12,12 @@ resource "aws_lambda_layer_version" "dependencies_layer" {
   layer_name  = "${local.name_prefix}-python-libraries-layer"
   description = "Pythonの共通ライブラリ (requests, etc.)"
 
-  # レイヤーのコンテンツとなるZIPファイルをS3から指定
-  s3_bucket        = aws_s3_bucket.s3_train_alert.id
-  s3_key           = aws_s3_object.lambda_layer_zip.key
-  source_code_hash = filebase64sha256(local.lambda_layer_zip_path)
+  s3_bucket = aws_s3_bucket.s3_train_alert.id
+  s3_key    = aws_s3_object.lambda_layer_zip.key
+  # レイヤーのソースコードのハッシュ値。この値が変更されると、新しいバージョンのレイヤーが作成されます。
+  # archive_fileデータソースが生成したZIPファイルのハッシュ値を指定します。
+  source_code_hash = data.archive_file.lambda_layer.output_base64sha256
 
-  # このレイヤーが互換性を持つランタイムを指定
   compatible_runtimes = var.lambda_runtime_version
 }
 

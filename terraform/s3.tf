@@ -87,9 +87,6 @@ resource "aws_s3_object" "folders" {
 resource "aws_s3_object" "lambda_layer_zip" {
   bucket = aws_s3_bucket.s3_train_alert.id
   key    = "lambda-layers/python_libraries.zip" # S3内でのオブジェクトキー
-  source = local.lambda_layer_zip_path          # アップロードするローカルファイルのパス
-
-  # ローカルファイルのMD5ハッシュ値をetagとして使用
-  # ファイルの内容が変更された場合のみ、S3オブジェクトが再作成（再アップロード）されます。
-  etag = filemd5("${path.module}/lambda-layers/requirements.txt")
+  content = data.archive_file.lambda_layer.output_bytes
+  etag    = data.archive_file.lambda_layer.output_md5
 }
