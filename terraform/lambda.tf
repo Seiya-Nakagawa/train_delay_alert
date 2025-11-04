@@ -13,9 +13,9 @@ resource "aws_lambda_layer_version" "dependencies_layer" {
   description = "Pythonの共通ライブラリ (requests, etc.)"
 
   # レイヤーのコンテンツとなるZIPファイルをS3から指定
-  s3_bucket         = aws_s3_bucket.s3_train_alert.id
-  s3_key            = aws_s3_object.lambda_layer_zip.key
-source_code_hash = filebase64sha256(local.lambda_layer_zip_path)
+  s3_bucket        = aws_s3_bucket.s3_train_alert.id
+  s3_key           = aws_s3_object.lambda_layer_zip.key
+  source_code_hash = filebase64sha256(local.lambda_layer_zip_path)
 
   # このレイヤーが互換性を持つランタイムを指定
   compatible_runtimes = var.lambda_runtime_version
@@ -34,7 +34,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
   role          = aws_iam_role.lambda_exec_role.arn
 
   # デプロイパッケージの指定
-  filename         = data.archive_file.user_settings_lambda_function_zip.output_path
+  filename = data.archive_file.user_settings_lambda_function_zip.output_path
   source_code_hash = base64sha256(join("", [
     file("${path.module}/lambda/user_settings_lambda.py"),
     file("${path.module}/lambda/railway_list.json")
@@ -95,7 +95,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
   role          = aws_iam_role.lambda_exec_role.arn
 
   # デプロイパッケージ
-  filename         = data.archive_file.check_delay_handler_function_zip.output_path
+  filename = data.archive_file.check_delay_handler_function_zip.output_path
   source_code_hash = base64sha256(join("", [
     file("${path.module}/lambda/check_delay_handler.py"),
     file("${path.module}/lambda/railway_list.json")
@@ -119,6 +119,6 @@ resource "aws_lambda_function" "check_delay_lambda" {
   }
 
   tags = merge(local.tags, {
-    Name = "${local.name_prefix}-lambda-check-delay"
+    Name = "${local.name_prefix}-lambda-check-delay1"
   })
 }
