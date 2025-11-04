@@ -9,15 +9,9 @@
 # 複数のLambda関数で共有するライブラリ（requestsなど）をまとめたレイヤーを定義します。
 # レイヤーを使用することで、各関数のデプロイパッケージサイズを削減できます。
 resource "aws_lambda_layer_version" "dependencies_layer" {
-  layer_name  = "${local.name_prefix}-laver-python-libraries"
-  description = "Pythonの共通ライブラリ (requests, etc.)"
-  filename    = "./lambda-layers/python_libraries.zip"
-  # s3_bucket = aws_s3_bucket.s3_train_alert.id
-  # s3_key    = aws_s3_object.lambda_layer_zip.key
-  # レイヤーのソースコードのハッシュ値。この値が変更されると、新しいバージョンのレイヤーが作成されます。
-  # archive_fileデータソースが生成したZIPファイルのハッシュ値を指定します。
-  # source_code_hash = data.archive_file.lambda_layer.output_base64sha256
-
+  layer_name          = "${local.name_prefix}-laver-python-libraries"
+  description         = "Pythonの共通ライブラリ (requests, etc.)"
+  filename            = "./lambda-layers/python_libraries.zip"
   compatible_runtimes = var.lambda_runtime_version
 }
 
