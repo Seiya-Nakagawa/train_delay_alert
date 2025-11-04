@@ -73,7 +73,7 @@ resource "aws_lambda_function_url" "user_settings_url" {
     allow_credentials = false
     allow_origins     = [var.frontend_origin]
     allow_methods     = ["*"]
-    allow_headers     = ["content-Type"]
+    allow_headers     = ["content-type"]
     max_age           = 86400 # 1日
   }
 }
