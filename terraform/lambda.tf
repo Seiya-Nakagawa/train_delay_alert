@@ -34,11 +34,11 @@ resource "aws_lambda_function" "user_settings_lambda" {
   role          = aws_iam_role.lambda_exec_role.arn
 
   # デプロイパッケージの指定
-  filename = data.archive_file.user_settings_lambda_function_zip.output_path
-  source_code_hash = base64sha256(join("", [
-    file("${path.module}/lambda/user_settings_lambda.py"),
-    file("${path.module}/lambda/railway_list.json")
-  ]))
+  filename = "${path.module}/user_settings_lambda.zip"
+
+  # lifecycle {
+  #   ignore_changes = [filename, source_code_hash]
+  # }
 
   # 共通ライブラリレイヤーをアタッチ
   layers = [aws_lambda_layer_version.dependencies_layer.arn]
@@ -95,11 +95,11 @@ resource "aws_lambda_function" "check_delay_lambda" {
   role          = aws_iam_role.lambda_exec_role.arn
 
   # デプロイパッケージ
-  filename = data.archive_file.check_delay_handler_function_zip.output_path
-  source_code_hash = base64sha256(join("", [
-    file("${path.module}/lambda/check_delay_handler.py"),
-    file("${path.module}/lambda/railway_list.json")
-  ]))
+  filename = "${path.module}/check_delay_handler.zip"
+
+  # lifecycle {
+  #   ignore_changes = [filename, source_code_hash]
+  # }
 
   layers = [aws_lambda_layer_version.dependencies_layer.arn]
 
