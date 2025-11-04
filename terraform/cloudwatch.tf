@@ -18,6 +18,7 @@ resource "aws_cloudwatch_metric_alarm" "user_settings_lambda_errors" {
   threshold           = "1"          # 閾値
   alarm_description   = "user_settings_lambdaでエラーが1回以上発生した場合にアラートを発報します。"
   actions_enabled     = true
+  treat_missing_data  = "notBreaching"
 
   # アラームの対象となるLambda関数を指定
   dimensions = {
@@ -26,8 +27,6 @@ resource "aws_cloudwatch_metric_alarm" "user_settings_lambda_errors" {
 
   # アラーム状態になった時に通知するSNSトピック
   alarm_actions = [aws_sns_topic.sns_topic_system.arn]
-  # OK状態に戻った時に通知するSNSトピック
-  ok_actions = [aws_sns_topic.sns_topic_system.arn]
 
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-user-settings-lambda-errors"
@@ -48,13 +47,13 @@ resource "aws_cloudwatch_metric_alarm" "check_delay_lambda_errors" {
   threshold           = "1"
   alarm_description   = "check_delay_lambdaでエラーが1回以上発生した場合にアラートを発報します。"
   actions_enabled     = true
+  treat_missing_data  = "notBreaching"
 
   dimensions = {
     FunctionName = aws_lambda_function.check_delay_lambda.function_name
   }
 
   alarm_actions = [aws_sns_topic.sns_topic_system.arn]
-  ok_actions    = [aws_sns_topic.sns_topic_system.arn]
 
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-check-delay-lambda-errors"
