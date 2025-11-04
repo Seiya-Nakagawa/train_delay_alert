@@ -8,13 +8,12 @@
 # -----------------------------------------------------------------------------
 # 5分ごとにイベントを発生させるルール
 resource "aws_cloudwatch_event_rule" "check_delay_rule" {
-  name                = "${local.name_prefix}-check-delay-rule"
-  description         = "5分ごとに電車の遅延情報をチェックするLambdaをトリガーします。"
+  name        = "${local.name_prefix}-check-delay-rule"
+  description = "5分ごとに電車の遅延情報をチェックするLambdaをトリガーします。"
   # スケジュール式 (rate式: 指定した間隔で実行)
-  schedule_expression = "rate(5 minutes)"
+  schedule_expression = "rate(60 minutes)"
 
-  # 開発期間中は無効化。本番投入時に"ENABLED"に変更します。
-  state = "DISABLED"
+  state = "ENABLED"
 
   tags = merge(local.tags, {
     Name = "${local.name_prefix}-check-delay-rule"
