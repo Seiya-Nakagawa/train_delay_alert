@@ -119,6 +119,6 @@ resource "aws_lambda_function" "check_delay_lambda" {
   }
 
   tags = merge(local.tags, {
-    Name = "${local.name_prefix}-lambda-check-delay1"
+    Name = "${local.name_prefix}-lambda-check-delay"
   })
 }
