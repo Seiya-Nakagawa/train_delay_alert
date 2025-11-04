@@ -7,11 +7,11 @@
 # -----------------------------------------------------------------------------
 # Archive for Dummy Lambda Layer
 # -----------------------------------------------------------------------------
-data "archive_file" "lambda_layer" {
-  type        = "zip"
-  source_dir  = "${path.module}/lambda-layers/dummy"
-  output_path = "${path.module}/build/dummy_layer.zip"
-}
+# data "archive_file" "lambda_layer" {
+#   type        = "zip"
+#   source_dir  = "${path.module}/lambda-layers/dummy"
+#   output_path = "${path.module}/build/dummy_layer.zip"
+# }
 
 # -----------------------------------------------------------------------------
 # Archive for Dummy Lambda Function

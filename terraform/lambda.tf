@@ -9,14 +9,14 @@
 # 複数のLambda関数で共有するライブラリ（requestsなど）をまとめたレイヤーを定義します。
 # レイヤーを使用することで、各関数のデプロイパッケージサイズを削減できます。
 resource "aws_lambda_layer_version" "dependencies_layer" {
-  layer_name  = "${local.name_prefix}-python-libraries-layer"
+  layer_name  = "${local.name_prefix}-laver-python-libraries"
   description = "Pythonの共通ライブラリ (requests, etc.)"
-
-  s3_bucket = aws_s3_bucket.s3_train_alert.id
-  s3_key    = aws_s3_object.lambda_layer_zip.key
+  filename    = "./lambda-layers/python_libraries.zip"
+  # s3_bucket = aws_s3_bucket.s3_train_alert.id
+  # s3_key    = aws_s3_object.lambda_layer_zip.key
   # レイヤーのソースコードのハッシュ値。この値が変更されると、新しいバージョンのレイヤーが作成されます。
   # archive_fileデータソースが生成したZIPファイルのハッシュ値を指定します。
-  source_code_hash = data.archive_file.lambda_layer.output_base64sha256
+  # source_code_hash = data.archive_file.lambda_layer.output_base64sha256
 
   compatible_runtimes = var.lambda_runtime_version
 }
@@ -34,7 +34,7 @@ resource "aws_lambda_function" "user_settings_lambda" {
   role          = aws_iam_role.lambda_exec_role.arn
 
   # デプロイパッケージの指定
-  filename = "${path.module}/user_settings_lambda.zip"
+  filename = "${path.module}/lambda/user_settings_lambda.zip"
 
   # lifecycle {
   #   ignore_changes = [filename, source_code_hash]
@@ -95,7 +95,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
   role          = aws_iam_role.lambda_exec_role.arn
 
   # デプロイパッケージ
-  filename = "${path.module}/check_delay_handler.zip"
+  filename = "${path.module}/lambda/check_delay_handler.zip"
 
   # lifecycle {
   #   ignore_changes = [filename, source_code_hash]
