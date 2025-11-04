@@ -91,5 +91,5 @@ resource "aws_s3_object" "lambda_layer_zip" {
 
   # ローカルファイルのMD5ハッシュ値をetagとして使用
   # ファイルの内容が変更された場合のみ、S3オブジェクトが再作成（再アップロード）されます。
-  etag = filemd5(local.lambda_layer_zip_path)
+  etag = filemd5("${path.module}/lambda-layers/requirements.txt")
 }
