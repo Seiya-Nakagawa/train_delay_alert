@@ -87,6 +87,6 @@ resource "aws_s3_object" "folders" {
 resource "aws_s3_object" "lambda_layer_zip" {
   bucket = aws_s3_bucket.s3_train_alert.id
   key    = "lambda-layers/python_libraries.zip" # S3内でのオブジェクトキー
-  content = data.archive_file.lambda_layer.output_bytes
-  etag    = data.archive_file.lambda_layer.output_md5
+  source = data.archive_file.lambda_layer.output_path
+  etag   = data.archive_file.lambda_layer.output_md5
 }
