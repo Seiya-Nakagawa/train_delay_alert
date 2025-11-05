@@ -56,12 +56,14 @@ jobs:
 
   # 5. 以下のジョブも '_deploy_template' と同じインデントレベルに揃えます
   deploy-user_settings_lambda:
+    if: github.event_name == 'push'
     uses: ./.github/workflows/lambda_functions_deploy.yml
     with:
       FUNCTION_DIR: user_settings_lambda
       FUNCTION_NAME: train-prd-lambda-user-settings
 
   deploy-check_delay-handler:
+    if: github.event_name == 'push'
     uses: ./.github/workflows/lambda_functions_deploy.yml
     with:
       FUNCTION_DIR: check_delay_handler
