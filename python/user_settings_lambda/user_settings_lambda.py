@@ -340,6 +340,6 @@ def lambda_handler(event: Dict[str, Any], context: object) -> Dict[str, Any]:
         return {
             "statusCode": 500,
             "body": json.dumps(
-                {"message": f"サーバー内部でエラーが発生しました111111: {str(e)}"}
+                {"message": f"サーバー内部でエラーが発生しました1111111: {str(e)}"}
             ),
         }
