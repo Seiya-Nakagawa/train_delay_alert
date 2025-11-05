@@ -1,5 +1,6 @@
 name: Deploy Lambda functions and Layer
 
+# 2. 'on' はインデントなしで開始します
 on:
   push:
     branches:
@@ -13,9 +14,10 @@ on:
       - "python/check_delay_handler/**"
       - "python/user_settings_lambda/**"
 
+# 3. 'jobs' もインデントなしで開始します
 jobs:
-  # デプロイ用のテンプレートジョブ
-  .deploy_template:
+  # 4. '_deploy_template' は 'jobs' の下に2スペースでインデントします
+  _deploy_template:
     runs-on: ubuntu-latest
     steps: &deploy_steps
       - name: Checkout
@@ -36,10 +38,11 @@ jobs:
         run: |
           echo "Deploying from directory: python/${{ env.FUNCTION_DIR }}"
           cd python/${{ env.FUNCTION_DIR }}
-          zip -r ./${{ env.FUNCTION_DIR }}.zip ./*
+          zip -r ./${{ env.FUNCTION_DIR }}.zip .
           aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --zip-file fileb:./${{ env.FUNCTION_DIR }}.zip
         working-directory: ${{ github.workspace }}
 
+  # 5. 以下のジョブも '_deploy_template' と同じインデントレベルに揃えます
   deploy-user_settings_lambda:
     runs-on: ubuntu-latest
     env:
@@ -47,7 +50,7 @@ jobs:
       FUNCTION_NAME: train-prd-lambda-user-settings
     steps: *deploy_steps
 
-  deploy-check-delay-handler:
+  deploy-check_delay-handler:
     runs-on: ubuntu-latest
     env:
       FUNCTION_DIR: check_delay_handler
