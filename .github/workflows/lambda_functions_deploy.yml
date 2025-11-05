@@ -19,6 +19,7 @@ env:
 
 jobs:
   deploy_template:
+    environment: AWS_PRD
     permissions:
       id-token: write
       contents: read
