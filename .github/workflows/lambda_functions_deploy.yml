@@ -50,5 +50,5 @@ jobs:
       - name: Deploy
         run: |
           echo "Deploying from directory: python/${{ env.FUNCTION_DIR }}"
-          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --zip-file fileb://.tmp/${{ env.FUNCTION_DIR }}.zip
+          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --zip-file fileb://./tmp/${{ env.FUNCTION_DIR }}.zip
         working-directory: ${{ github.workspace }}
