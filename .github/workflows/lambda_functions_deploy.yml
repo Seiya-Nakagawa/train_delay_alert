@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.13
+          python-version: 3.12
 
       - name: Configure AWS credentials with OIDC
         uses: aws-actions/configure-aws-credentials@v1
@@ -61,6 +61,7 @@ jobs:
     with:
       FUNCTION_DIR: user_settings_lambda
       FUNCTION_NAME: train-prd-lambda-user-settings
+    secrets: inherit
 
   deploy-check_delay-handler:
     if: github.event_name == 'push'
@@ -68,3 +69,4 @@ jobs:
     with:
       FUNCTION_DIR: check_delay_handler
       FUNCTION_NAME: train-prd-lambda-check-delay
+    secrets: inherit
