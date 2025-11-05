@@ -5,19 +5,31 @@ on:
   push:
     branches:
       - main
-      - new_development
-  pull_request:
-    types:
-      - opened
-      - synchronize
+      - pipeline_test
+    # pull_request:
+    #   types:
+    #     - opened
+    #     - synchronize
     paths:
       - "python/check_delay_handler/**"
       - "python/user_settings_lambda/**"
+  workflow_call:
+    inputs:
+      FUNCTION_DIR:
+        required: true
+        type: string
+      FUNCTION_NAME:
+        required: true
+        type: string
+    secrets:
+      AWS_IAM_ROLE_ARN:
+        required: true
 
 # 3. 'jobs' もインデントなしで開始します
 jobs:
   # 4. '_deploy_template' は 'jobs' の下に2スペースでインデントします
-  _deploy_template:
+  deploy_template:
+    if: github.event_name == 'workflow_call'
     runs-on: ubuntu-latest
     steps: &deploy_steps
       - name: Checkout
@@ -34,25 +46,23 @@ jobs:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ap-northeast-1
 
-      - name: Build and deploy ${{ env.FUNCTION_NAME }}
+      - name: Build and deploy ${{ inputs.FUNCTION_NAME }}
         run: |
-          echo "Deploying from directory: python/${{ env.FUNCTION_DIR }}"
-          cd python/${{ env.FUNCTION_DIR }}
-          zip -r ./${{ env.FUNCTION_DIR }}.zip .
-          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --zip-file fileb:./${{ env.FUNCTION_DIR }}.zip
+          echo "Deploying from directory: python/${{ inputs.FUNCTION_DIR }}"
+          cd python/${{ inputs.FUNCTION_DIR }}
+          zip -r ./${{ inputs.FUNCTION_DIR }}.zip .
+          aws lambda update-function-code --function-name ${{ inputs.FUNCTION_NAME }} --zip-file fileb:./${{ inputs.FUNCTION_DIR }}.zip
         working-directory: ${{ github.workspace }}
 
   # 5. 以下のジョブも '_deploy_template' と同じインデントレベルに揃えます
   deploy-user_settings_lambda:
-    runs-on: ubuntu-latest
-    env:
+    uses: ./.github/workflows/lambda_functions_deploy.yml
+    with:
       FUNCTION_DIR: user_settings_lambda
       FUNCTION_NAME: train-prd-lambda-user-settings
-    steps: *deploy_steps
 
   deploy-check_delay-handler:
-    runs-on: ubuntu-latest
-    env:
+    uses: ./.github/workflows/lambda_functions_deploy.yml
+    with:
       FUNCTION_DIR: check_delay_handler
       FUNCTION_NAME: train-prd-lambda-check-delay
-    steps: *deploy_steps
