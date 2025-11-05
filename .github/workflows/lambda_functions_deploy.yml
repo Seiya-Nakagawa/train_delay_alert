@@ -11,6 +11,7 @@ on:
     #     - synchronize
     paths:
       - "python/user_settings_lambda/**"
+      - "python/railway_list.json"
 
 env:
   AWS_DEFAULT_REGION: "ap-northeast-1"
@@ -44,6 +45,7 @@ jobs:
           echo "Building from directory: python/${{ env.FUNCTION_DIR }}"
           mkdir ./tmp
           cd python/${{ env.FUNCTION_DIR }}
+          cp -pa ../railway_list.json .
           zip -r ../../tmp/${{ env.FUNCTION_DIR }}.zip *
         working-directory: ${{ github.workspace }}
 
