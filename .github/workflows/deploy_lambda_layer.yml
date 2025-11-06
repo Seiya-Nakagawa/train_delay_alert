@@ -51,8 +51,8 @@ jobs:
       - name: Deploy
         run: |
           aws lambda publish-layer-version \
-            --layer-name ${{ env.LAYER_NAME }} \ # レイヤー名を指定
+            --layer-name ${{ env.LAYER_NAME }} \
             --description "My Python layer with dependencies" \
-            --zip-file fileb://./tmp/layer.zip \
-            --compatible-runtimes python3.13 \ # 互換性のあるランタイムを指定
+            --zip-file fileb://./tmp/${{ env.ZIP_FILENAME }} \
+            --compatible-runtimes python3.13 \
         working-directory: ${{ github.workspace }}
