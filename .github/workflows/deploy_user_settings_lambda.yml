@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - pipeline_test
     paths:
       - "python/user_settings_lambda/**"
       - "python/railway_list.json"
