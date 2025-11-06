@@ -1,5 +1,5 @@
 # このワークフローは、ユーザー設定Lambda関数とその関連レイヤーをデプロイします。
-name: Deploy Lambda functions and Layer
+name: Deploy user_settings_lambda
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Configure AWS credentials with OIDC
         uses: aws-actions/configure-aws-credentials@v4

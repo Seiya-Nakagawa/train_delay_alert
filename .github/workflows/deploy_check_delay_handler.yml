@@ -1,5 +1,5 @@
 # このワークフローは、ユーザー設定Lambda関数とその関連レイヤーをデプロイします。
-name: Deploy Lambda functions and Layer
+name: Deploy check_delay_handler
 
 on:
   push:
