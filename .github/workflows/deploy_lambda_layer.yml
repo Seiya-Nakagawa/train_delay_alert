@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - pipeline_test
     paths:
       - "python/requirements.txt"
 
