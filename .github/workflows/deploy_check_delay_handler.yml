@@ -1,0 +1,54 @@
+# このワークフローは、ユーザー設定Lambda関数とその関連レイヤーをデプロイします。
+name: Deploy check_delay_handler
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "python/check_delay_handler/**"
+      - "python/railway_list.json"
+
+env:
+  AWS_DEFAULT_REGION: "ap-northeast-1"
+  FUNCTION_DIR: "check_delay_handler"
+  FUNCTION_NAME: "train-prd-lambda-check-delay"
+
+jobs:
+  deploy_template:
+    environment: AWS_PRD
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Build
+        # Lambda関数と依存関係をパッケージ化
+        run: |
+          echo "Building from directory: python/${{ env.FUNCTION_DIR }}"
+          mkdir ./tmp
+          cd python/${{ env.FUNCTION_DIR }}
+          cp -pa ../railway_list.json .
+          zip -r ../../tmp/${{ env.FUNCTION_DIR }}.zip *
+        working-directory: ${{ github.workspace }}
+
+      - name: Deploy
+        # Lambda関数をAWSにデプロイ
+        run: |
+          echo "Deploying from directory: python/${{ env.FUNCTION_DIR }}"
+          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --zip-file fileb://./tmp/${{ env.FUNCTION_DIR }}.zip
+        working-directory: ${{ github.workspace }}
