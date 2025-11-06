@@ -52,7 +52,7 @@ jobs:
         run: |
           aws lambda publish-layer-version \
             --layer-name ${{ env.LAYER_NAME }} \
-            --description "My Python layer with dependencies" \
+            --description "" \
             --zip-file fileb://./tmp/${{ env.ZIP_FILENAME }} \
             --compatible-runtimes python3.13 \
         working-directory: ${{ github.workspace }}
