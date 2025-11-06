@@ -567,5 +567,5 @@ def lambda_handler(event, context):
         }
     except Exception as e:
         # ハンドラ全体で予期せぬエラーをキャッチし、ログに出力
-        logger.critical("lambda_handlerで予期せぬエラーが発生しました", exc_info=True)
+        logger.critical("lambda_handlerで予期せぬエラーが発生しました1", exc_info=True)
         return {"statusCode": 500, "body": json.dumps(str(e), ensure_ascii=False)}
