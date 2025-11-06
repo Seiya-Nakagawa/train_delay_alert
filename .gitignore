@@ -1,0 +1,5 @@
+terraform/.terraform
+terraform/.terraform.lock.hcl
+error.log
+terraform/lambda/user_event.json
+terraform/lambda/user_settings_lambda_sample.py

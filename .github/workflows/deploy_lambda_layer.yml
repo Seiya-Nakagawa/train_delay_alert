@@ -1,0 +1,57 @@
+# このワークフローは、ユーザー設定Lambda関数とその関連レイヤーをデプロイします。
+name: Deploy Lambda Layer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "python/requirements.txt"
+
+env:
+  AWS_DEFAULT_REGION: "ap-northeast-1"
+  LAYER_NAME: "train-prd-laver-python-libraries"
+  ZIP_FILENAME: "python_libraries.zip"
+
+jobs:
+  deploy_template:
+    environment: AWS_PRD
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Install libraries
+        run: |
+          mkdir ./tmp
+          pip install --upgrade pip
+          pip install -r ./python/requirements.txt -t ./tmp/python/lib/python3.13/site-packages
+        working-directory: ${{ github.workspace }}
+
+      - name: Build
+        # Lambda関数と依存関係をパッケージ化
+        run: |
+          zip -r ./tmp/${{ env.ZIP_FILENAME }} ./tmp/python
+        working-directory: ${{ github.workspace }}
+      - name: Deploy
+        run: |
+          aws lambda publish-layer-version \
+            --layer-name ${{ env.LAYER_NAME }} \
+            --description "" \
+            --zip-file fileb://./tmp/${{ env.ZIP_FILENAME }} \
+            --compatible-runtimes python3.13 \
+        working-directory: ${{ github.workspace }}

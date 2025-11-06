@@ -1,0 +1,65 @@
+<!--
+  路線遅延通知システム フロントエンド
+  このHTMLファイルは、ユーザーが遅延通知を設定するためのUIを提供します。
+-->
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>路線遅延通知システム</title>
+  <!-- スタイルシートの読み込み -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- ヘッダー: ページタイトル -->
+  <header>
+    <h1>路線遅延通知システム</h1>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main>
+    <!-- ユーザー情報表示エリア (通常は非表示) -->
+    <div id="userInfo" class="user-info" style="display: none;">
+      <p>LINE User ID: <span id="userId"></span></p>
+    </div>
+
+    <!-- メッセージ表示エリア: 読み込み中やエラーメッセージを表示 -->
+    <div id="messageArea">
+      <p id="messageText">ユーザー情報を読み込んでいます...</p>
+    </div>
+
+    <!-- 設定フォーム全体 (初期状態では非表示) -->
+    <div id="formContainer" class="container" style="display: none;">
+      <!-- 路線登録セクション -->
+      <h2>登録路線</h2>
+      <p class="description">最大5つまで登録できます。</p>
+      <!-- 路線入力欄が動的に追加されるコンテナ -->
+      <div id="routeListContainer">
+        <!-- 登録された路線がここに追加されます -->
+      </div>
+      <!-- 路線入力欄を追加するボタン -->
+      <button id="addRowButton" class="add-row-btn">+</button>
+
+
+
+      <!-- 保存ボタン -->
+      <div class="save-container">
+        <button id="saveButton" class="action-btn">保存</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- フッター -->
+  <footer>
+    <p>&copy; 2025 train_delay_alert</p>
+  </footer>
+
+  <!-- JavaScriptファイルの読み込み -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
