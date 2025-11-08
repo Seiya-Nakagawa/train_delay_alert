@@ -14,14 +14,15 @@
 ### 主要コンポーネント
 
 * **フロントエンド (GitHub Pages):** ユーザーが路線を設定するための静的Webサイト。
-* **バックエンド (AWS Lambda): 環境設定の保存、遅延チェック、LINE通知などのコアロジックを実行。
+* **バックエンド (AWS Lambda)**: 環境設定の保存、遅延チェック、LINE通知などのコアロジックを実行。
 * **データベース (Amazon DynamoDB):** ユーザーのLINE IDと登録路線を紐付けて管理。
 * **インフラ管理 (Terraform):** AWSリソースをコードで管理。
 
 ## 3. 主な利用技術
 
 * **クラウド:** AWS
-* **IaC:** Terraform
+* **IaC:** Terraform Cloud
+* **CI/CD:**GitHub Actions(Lambda)
 * **バックエンド:** Python (AWS Lambda)
 * **フロントエンド:** HTML, CSS, JavaScript (GitHub Pages)
 * **データベース:** Amazon DynamoDB
@@ -33,99 +34,110 @@
 
 ```text
 .
+├── .github/
+│   └── workflows/     # CI/CDのワークフロー定義
 ├── docs/              # GitHub Pagesでホスティングされるフロントエンドのソースコード
+├── python/            # Lambda関数のPythonソースコード
 ├── specs/             # 基本設計書などのドキュメント類
 ├── terraform/         # AWSリソースを定義するTerraformコード
-│   ├── lambda/        # Lambda関数のPythonソースコード
-│   └── lambda-layers/ # Lambdaレイヤー（共通ライブラリ）のソース
 ├── .gitignore
 ├── pyproject.toml
 └── README.md
 ```
 
-## 5. デプロイ手順
+## 5. デプロイ
 
-### 前提条件
+本システムは、インフラ層とアプリケーション層で分離されたCI/CDパイプラインによってデプロイが自動化されています。
 
-* AWSアカウント
-* Terraform CLI
+* **インフラ (AWSリソース):** Terraform CloudによるVCS-driven workflow
+
+* **アプリケーション (Lambda関数,Lambdaレイヤー):** GitHub Actionsによるデプロイ
+
+### 5.1. インフラのデプロイ (Terraform Cloud)
+
+`terraform`ディレクトリ配下のAWSリソースは、Terraform Cloudによって管理されます。
+
+`main`ブランチに対するプルリクエスト (PR) が作成されると、Terraform Cloudは自動的に`terraform plan`を実行し、変更内容をレビューできます。PRが`main`ブランチにマージされると、自動的に`terraform apply`が実行され、インフラの変更が適用されます。
+
+#### 前提条件
+
+* AWSアカウントとTerraform Cloudアカウントの連携設定
+
+* Terraform CloudのWorkspace作成と、対象リポジトリとの連携設定
+
 * LINE Developersアカウント
-  * LINEログインチャネル
-  * Messaging APIチャネル
+
 * 公共交通オープンデータセンターのアクセストークン
 
-### 手順
+#### 初回セットアップ
 
-1. **リポジトリのクローン**
+1. **機密情報の設定**
 
-    ```bash
-    git clone https://github.com/your-username/train_delay_alert.git
-    cd train_delay_alert
-    ```
+    * **Terraform Cloud:**
 
-2. **機密情報の設定**
+        Workspaceの`Variables`に、AWS認証情報や以下の変数を環境変数として設定します。機密情報は"Sensitive"に設定してください。
 
-    以下の情報をAWS Systems Manager パラメータストアに事前に登録します。
+        * `TF_VAR_line_channel_secret_param_name`
 
-    * LINEログインチャネルのチャネルシークレット
-    * Messaging APIチャネルのチャネルアクセストークン
-    * 公共交通オープンデータセンターのアクセストークン
+        * `TF_VAR_line_channel_access_token_param_name`
 
-3. **Terraform変数の設定**
+        * `TF_VAR_odpt_access_token_param_name`
 
-    `terraform`ディレクトリに`terraform.tfvars`ファイルを作成し、環境に合わせて変数を設定します。
+        * その他`variables.tf`で定義されている変数
 
-    **`terraform/terraform.tfvars` (例)**
+    * **AWS Systems Manager パラメータストア:**
 
-    ```hcl
-    aws_region                = "ap-northeast-1"
-    system_name               = "train-delay-alert"
-    env                       = "dev"
-    notification_emails       = ["admin@example.com"]
-    frontend_redirect_url     = "https://your-github-username.github.io/train_delay_alert/index.html" # ご自身のGitHub PagesのURL
-    frontend_origin           = "https://your-github-username.github.io" # ご自身のGitHub Pagesのオリジン
-    line_login_channel_id     = "YOUR_LINE_LOGIN_CHANNEL_ID"
-    line_post_channel_id      = "YOUR_LINE_MESSAGING_API_CHANNEL_ID"
-    # パラメータストアに登録した名前
-    line_channel_secret_param_name      = "/train-delay-alert/dev/line_channel_secret"
-    line_channel_access_token_param_name = "/train-delay-alert/dev/line_channel_access_token"
-    odpt_access_token_param_name        = "/train-delay-alert/dev/odpt_access_token"
-    ```
+        Terraformで参照する以下の機密情報を事前に登録します。
 
-4. **Lambdaレイヤーの作成**
+        * LINEログインチャネルのチャネルシークレット
 
-    `requests`ライブラリを含むLambdaレイヤーを作成します。
+        * Messaging APIチャネルのチャネルアクセストークン
 
-    ```bash
-    cd terraform/lambda-layers
-    pip install -r requirements.txt -t ./python
-    zip -r python_libraries.zip ./
-    cd ../..
-    ```
+        * 公共交通オープンデータセンターのアクセストークン
 
-5. **Terraformによるデプロイ**
+    * **GitHub Actions Secrets:**
 
-    ```bash
-    cd terraform
-    terraform init
-    terraform apply
-    ```
+        GitHubリポジトリの `Settings` > `Secrets and variables` > `Actions` で、AWSへのOIDC接続に使用するIAMロールのARNを `AWS_IAM_ROLE_ARN` という名前で登録します。
 
-6. **フロントエンドの設定**
+2. **インフラのプロビジョニング**
 
-    デプロイ完了後、Terraformの出力に表示される`user_settings_lambda_url`の値を、`docs/config.js`に設定します。
+    `terraform`ディレクトリ配下のコードを`main`ブランチにプッシュします。これによりTerraform Cloudがトリガーされ、インフラが構築されます。
+
+3. **フロントエンドの設定**
+
+    Terraform Cloudの実行結果から`user_settings_lambda_url`の値を取得し、`docs/config.js`に設定します。
 
     **`docs/config.js`**
 
     ```javascript
+
     const config = {
+
         API_ENDPOINT: 'https://xxxxxxxxxx.lambda-url.ap-northeast-1.on.aws/' // Terraformの出力結果に書き換える
+
     };
+
     ```
 
-7. **GitHub Pagesの有効化**
+4. **GitHub Pagesの有効化**
 
     GitHubリポジトリの `Settings` > `Pages` で、`docs`ディレクトリをソースとしてGitHub Pagesを有効化します。
+
+### 5.2. アプリケーションのデプロイ (GitHub Actions)
+
+Lambda関数のソースコードや依存ライブラリは、GitHub Actionsによって自動でデプロイされます。
+
+`python`ディレクトリ配下のソースコード等を変更し`main`ブランチにプッシュすると、対応するワークフローが実行されます。
+
+| ワークフロー | トリガーとなる変更 | 説明 |
+
+| :--- | :--- | :--- |
+
+| **Deploy Lambda Layer** | `python/requirements.txt` | Pythonの依存ライブラリをまとめたLambdaレイヤーをビルドし、AWSにデプロイします。 |
+
+| **Deploy user_settings_lambda** | `python/user_settings_lambda/**` | ユーザー設定用Lambda関数をパッケージ化し、AWSにデプロイします。 |
+
+| **Deploy check_delay_handler** | `python/check_delay_handler/**` | 遅延チェック用Lambda関数をパッケージ化し、AWSにデプロイします。 |
 
 ## 6. 使い方
 
