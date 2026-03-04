@@ -547,7 +547,7 @@ def lambda_handler(event, context):
             s3_client.put_object(
                 Bucket=S3_BUCKET_NAME,
                 Key=DELAY_MESSAGES_FILE_KEY,
-                Body=new_delay_messages_list,
+                Body=json.dumps(new_delay_messages_list, ensure_ascii=False),
             )
         else:
             s3_client.delete_object(
