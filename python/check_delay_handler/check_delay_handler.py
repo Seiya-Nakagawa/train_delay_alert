@@ -30,6 +30,7 @@ CHALLENGE_ACCESS_TOKEN_PARAM_NAME = os.environ.get("CHALLENGE_ACCESS_TOKEN_PARAM
 S3_BUCKET_NAME = os.environ.get("S3_OUTPUT_BUCKET")
 USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME")
 NG_WORD = os.environ.get("NG_WORD")
+RESPONSE_TIMEOUT = int(os.environ.get("RESPONSE_TIMEOUT", "10"))
 
 # --- S3オブジェクトキー設定 ---
 USER_LIST_FILE_KEY = "user-list.json"  # 処理対象のユーザーリストが格納されたS3キー
@@ -246,7 +247,7 @@ def get_realtime_train_information():
             logger.info(f"APIエンドポイントを呼び出します: {url}")
             params = {"acl:consumerKey": token}
 
-            response = requests.get(url, params=params)
+            response = requests.get(url, params=params, timeout=RESPONSE_TIMEOUT)
             response.raise_for_status()  # HTTPエラーがあれば例外を発生させる
 
             response_data = response.json()
@@ -540,7 +541,7 @@ def lambda_handler(event, context):
 
         # --- 5. 遅延判定と通知処理 ---
         new_delay_messages_list = delay_check(
-            user_route_list, realtime_data_list, railway_list, s3_delay_list
+            s3_route_list, realtime_data_list, railway_list, s3_delay_list
         )
 
         if new_delay_messages_list:
