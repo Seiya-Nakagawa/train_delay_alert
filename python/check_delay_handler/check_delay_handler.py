@@ -29,8 +29,12 @@ ODPT_ACCESS_TOKEN_PARAM_NAME = os.environ.get("ODPT_ACCESS_TOKEN_PARAM_NAME")
 CHALLENGE_ACCESS_TOKEN_PARAM_NAME = os.environ.get("CHALLENGE_ACCESS_TOKEN_PARAM_NAME")
 S3_BUCKET_NAME = os.environ.get("S3_OUTPUT_BUCKET")
 USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME")
-NG_WORD = os.environ.get("NG_WORD")
-RESPONSE_TIMEOUT = int(os.environ.get("RESPONSE_TIMEOUT", "10"))
+NG_WORD = os.environ.get("NG_WORD", "")
+# APIリクエストのタイムアウト設定（秒）
+# connect: サーバーへの接続確立の最大待機時間（ダウン時に早期に判断するため非常に短く設定）
+# read: 接続確立後、レスポンスを受け取るまでの最大待機時間
+CONNECT_TIMEOUT = 2
+READ_TIMEOUT = int(os.environ.get("RESPONSE_TIMEOUT", "15"))
 
 # --- S3オブジェクトキー設定 ---
 USER_LIST_FILE_KEY = "user-list.json"  # 処理対象のユーザーリストが格納されたS3キー
@@ -235,37 +239,45 @@ def get_line_list(s3_lineuserid_list):
 def get_realtime_train_information():
     """リアルタイム運行情報APIを呼び出し、全路線の現在の運行状況を取得する.
 
-    設定された複数のAPIエンドポイントから情報を収集し、結果を一つのリストに結合する。
-
     Returns:
         list | None: 全路線の運行情報のリスト。APIリクエストに失敗した場合はNone。
     """
     logger.info("全てのAPIエンドポイントからリアルタイム運行情報を取得します...")
-    try:
-        realtime_data_list = []
-        for url, token in api_url_token_pairs:
-            logger.info(f"APIエンドポイントを呼び出します: {url}")
-            params = {"acl:consumerKey": token}
+    realtime_data_list = []
+    success_count = 0
+    
+    for url, token in api_url_token_pairs:
+        logger.info(f"APIエンドポイントを呼び出します: {url}")
+        params = {"acl:consumerKey": token}
 
-            response = requests.get(url, params=params, timeout=RESPONSE_TIMEOUT)
-            response.raise_for_status()  # HTTPエラーがあれば例外を発生させる
+        try:
+            # 接続(connect)は2秒、読み取り(read)は環境変数の値(約15~30秒)でタイムアウト設定
+            response = requests.get(url, params=params, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+            response.raise_for_status()
 
             response_data = response.json()
             realtime_data_list.extend(response_data)
-            logger.debug(
-                f"{len(response_data)} 件のレコードを取得しました。",
+            success_count += 1
+            logger.info(
+                f"URL {url} から {len(response_data)} 件のレコードを取得しました。",
                 extra={"url": url, "record_count": len(response_data)},
             )
+        except requests.exceptions.RequestException as e:
+            # 片方のAPIが死んでいても、もう片方でデータが取れていれば「致命的なエラー」とはしない
+            logger.warning(
+                f"APIエンドポイント {url} が応答しません。このソースはスキップします: {e}",
+                extra={"url": url}
+            )
 
-        logger.info(
-            f"取得完了。合計 {len(realtime_data_list)} 件のレコードを取得しました。",
-            extra={"total_record_count": len(realtime_data_list)},
-        )
-        return realtime_data_list
-
-    except requests.exceptions.RequestException:
-        logger.error("APIへのリクエストに失敗しました。", exc_info=True)
+    if not realtime_data_list and success_count == 0:
+        logger.error("すべてのAPIエンドポイントからのデータ取得に失敗しました。")
         return None
+
+    logger.info(
+        f"運行情報の取得が完了しました。合計 {len(realtime_data_list)} 件のレコードを処理します。",
+        extra={"total_record_count": len(realtime_data_list)},
+    )
+    return realtime_data_list
 
 
 def create_snd_message(user_route, message):
@@ -407,8 +419,12 @@ def delay_check(user_route_list, realtime_data_list, railway_list, s3_delay_list
 
         # 鉄道名に一致するリアルタイム運行情報を検索
         for realtime_data in realtime_data_list:
-            if realtime_data["odpt:railway"] == user_route_id:
-                message = realtime_data["odpt:trainInformationText"]["ja"]
+            if realtime_data.get("odpt:railway") == user_route_id:
+                info_text = realtime_data.get("odpt:trainInformationText", {})
+                if isinstance(info_text, dict):
+                    message = info_text.get("ja", "")
+                else:
+                    message = str(info_text) if info_text else ""
                 break
         if not message:
             logger.warning(
