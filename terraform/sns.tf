@@ -14,13 +14,13 @@ resource "aws_sns_topic" "sns_topic_system" {
   delivery_policy = jsonencode({
     "http" : {
       "defaultHealthyRetryPolicy" : {
-        "minDelayTarget"     : 20,
-        "maxDelayTarget"     : 20,
-        "numRetries"         : 3,
+        "minDelayTarget" : 20,
+        "maxDelayTarget" : 20,
+        "numRetries" : 3,
         "numMaxDelayRetries" : 0,
-        "numNoDelayRetries"  : 0,
+        "numNoDelayRetries" : 0,
         "numMinDelayRetries" : 0,
-        "backoffFunction"    : "linear"
+        "backoffFunction" : "linear"
       },
       "disableSubscriptionOverrides" : false,
       "defaultThrottlePolicy" : {

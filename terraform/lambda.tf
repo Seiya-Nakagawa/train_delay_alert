@@ -80,7 +80,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
   function_name = "${local.name_prefix}-lambda-check-delay"
   handler       = "check_delay_handler.lambda_handler"
   runtime       = var.lambda_runtime_version[0]
-  timeout       = var.lambda_timeout_seconds
+  timeout       = max(var.lambda_timeout_seconds, 60)
   memory_size   = var.lambda_memory_size
   role          = aws_iam_role.lambda_exec_role.arn
 
@@ -100,7 +100,7 @@ resource "aws_lambda_function" "check_delay_lambda" {
       TRAIN_STATUS_TABLE_NAME           = aws_dynamodb_table.train_status.name
       USER_TABLE_NAME                   = aws_dynamodb_table.users.name
       NG_WORD                           = var.ng_word[0]
-      RESPONSE_TIMEOUT                  = var.response_timeout
+      RESPONSE_TIMEOUT                  = max(var.response_timeout, 55)
     }
   }
 
